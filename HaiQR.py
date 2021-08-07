@@ -71,7 +71,7 @@ class PView(BView):
 		
 class HaiQRWindow(BWindow):
 	Menus = (
-		('File', ((1, 'Generate from clipboard'),(2, 'About'),(None, None),(B_QUIT_REQUESTED, 'Quit')))
+		('File', ((1, 'Generate from clipboard'),(2, 'Save QR'),(3, 'About'),(None, None),(B_QUIT_REQUESTED, 'Quit')))
 		)
 	def __init__(self, frame):
 		selectionmenu=0
@@ -94,7 +94,7 @@ class HaiQRWindow(BWindow):
 		##### COLOR GRAY UNDER LISTS
 		self.underlist = BBox((l, t + barheight, r, b), 'underlist', B_FOLLOW_ALL, B_WILL_DRAW|B_NAVIGABLE, B_NO_BORDER)
 		self.AddChild(self.underlist)
-
+# no no no!		notis = BClipboard(
 		#zonte pview
 		
 		
@@ -104,7 +104,8 @@ class HaiQRWindow(BWindow):
 			#Gjenere QR
 			print("genero QR da clipboard")		
 			return
-		if msg.what == 2:
+
+		if msg.what == 3:
 			#ABOUT
 			self.About = AboutWindow()
 			self.About.Show()
@@ -116,6 +117,43 @@ class HaiQRWindow(BWindow):
 		print "So long and thanks for all the fish"
 		BApplication.be_app.WindowAt(0).PostMessage(B_QUIT_REQUESTED)
 		return 1
+		
+		
+		
+class AboutWindow(BWindow):
+	kWindowFrame = (150, 150, 650, 620)
+	kButtonFrame = (395, 425, 490, 460)
+	kWindowName = "About"
+	kButtonName = "Close"
+	BUTTON_MSG = struct.unpack('!l', 'PRES')[0]
+
+	def __init__(self):							
+		BWindow.__init__(self, self.kWindowFrame, self.kWindowName, B_MODAL_WINDOW, B_NOT_RESIZABLE|B_WILL_DRAW)
+		self.CloseButton = BButton(self.kButtonFrame, self.kButtonName, self.kButtonName, BMessage(self.BUTTON_MSG))		
+		cise=(10,4,485,420)
+		cjamput=(0,0,475,420)
+		self.messagjio= BTextView(cise, 'TxTView', cjamput, B_FOLLOW_ALL, B_WILL_DRAW)
+		self.messagjio.SetStylable(1)
+		self.messagjio.MakeSelectable(0)
+		self.messagjio.MakeEditable(0)
+		stuff = '\n\t\t\t\t\t\t\tBulletin Gator\n\n\t\t\t\t\t\t\t\t\t\t\tA simple feed aggregator\n\t\t\t\t\t\t\t\t\t\t\tfor Haiku, version 0.8.2\n\t\t\t\t\t\t\t\t\t\t\tcodename "Hully Gully"\n\n\t\t\t\t\t\t\t\t\t\t\tby Fabio Tomat aka TmTFx\n\t\t\t\t\t\t\t\t\t\t\te-mail:\n\t\t\t\t\t\t\t\t\t\t\tf.t.public@gmail.com\n\n\t\t\t\t\t\t\t\t\t\t\tspecial thanks to:\n\t\t\t\t\t\t\t\t\t\t\tVanessa W. x translations\n\nGNU GENERAL PUBLIC LICENSE:\nThis program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with this program.  If not, see \n<http://www.gnu.org/licenses/>'
+		n = stuff.find('Bulletin Gator')
+		m = stuff.find('This')
+		self.messagjio.SetText(stuff, [(0, be_plain_font, (0, 0, 0, 0)), (n, be_bold_font, (0, 150, 0, 0)), (n + 14, be_plain_font, (0, 0, 0, 0)),(m,be_plain_font,(100,150,0,0))])
+		self.AddChild(self.messagjio)
+		self.AddChild(self.CloseButton)
+		self.CloseButton.MakeFocus(1)
+		link=sys.path[0]+"/help/bgator5.png"
+		self.img=BTranslationUtils.GetBitmap(link)
+		#self.img.Bounds()
+		self.photoframe=PView((0,50,315,185),"photoframe",self.img)
+		self.AddChild(self.photoframe)
+
+	def MessageReceived(self, msg):
+		if msg.what == self.BUTTON_MSG:
+			self.Quit()
+		else:
+			return
 		
 		
 class HaiQRApplication(BApplication.BApplication):
