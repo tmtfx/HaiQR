@@ -22,8 +22,8 @@ jes=False
 try:
 	import BApplication,SupportKit
 	from BStringItem import BStringItem
-	from BListView import BListView
-	from BScrollView import BScrollView
+#	from BListView import BListView
+#	from BScrollView import BScrollView
 	from BWindow import BWindow
 	from BMessage import BMessage
 	from BMenuItem import BMenuItem
@@ -34,18 +34,18 @@ try:
 	from BPopUpMenu import BPopUpMenu
 	from BSeparatorItem import BSeparatorItem
 	from BStringView import BStringView
-	from BSlider import BSlider
+#	from BSlider import BSlider
 	from BTextView import BTextView
 	from BFont import be_plain_font, be_bold_font
 	from BTextControl import BTextControl
 	from BAlert import BAlert
-	from BListItem import BListItem
-	from BStatusBar import BStatusBar
+#	from BListItem import BListItem
+#	from BStatusBar import BStatusBar
 	from StorageKit import *
 	from BTranslationUtils import *
 	from BFile import BFile
 	from BBitmap import BBitmap
-	from BCheckBox import BCheckBox
+#	from BCheckBox import BCheckBox
 	from BView import BView
 	from InterfaceKit import B_VERTICAL,B_FOLLOW_ALL,B_FOLLOW_TOP,B_FOLLOW_LEFT,B_FOLLOW_RIGHT,B_TRIANGLE_THUMB,B_BLOCK_THUMB,B_FLOATING_WINDOW,B_TITLED_WINDOW,B_WILL_DRAW,B_NAVIGABLE,B_FRAME_EVENTS,B_ALIGN_CENTER,B_FOLLOW_ALL_SIDES,B_MODAL_WINDOW,B_FOLLOW_TOP_BOTTOM,B_FOLLOW_BOTTOM,B_FOLLOW_LEFT_RIGHT,B_SINGLE_SELECTION_LIST,B_NOT_RESIZABLE,B_NOT_ZOOMABLE,B_PLAIN_BORDER,B_FANCY_BORDER,B_NO_BORDER,B_ITEMS_IN_COLUMN
 	from AppKit import B_QUIT_REQUESTED,B_KEY_UP,B_KEY_DOWN,B_MODIFIERS_CHANGED,B_UNMAPPED_KEY_DOWN
