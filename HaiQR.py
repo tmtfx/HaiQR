@@ -16,7 +16,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-import os,sys
+import os,sys,struct
 
 jes=False
 try:
@@ -71,11 +71,15 @@ class PView(BView):
 		
 class HaiQRWindow(BWindow):
 	Menus = (
-		('File', ((1, 'Generate from clipboard'),(2, 'Save QR'),(3, 'About'),(None, None),(B_QUIT_REQUESTED, 'Quit')))
+		('File', ((1, 'Generate from clipboard'),(2, 'Save QR'),(None, None),(B_QUIT_REQUESTED, 'Quit'))),
+		('View', ((5, 'Install on Deskbar'),(6, 'Remove from Deskbar'))),
+		('Help', ((4, 'Help'),(3, 'About')))
 		)
+		
 	def __init__(self, frame):
 		selectionmenu=0
 		BWindow.__init__(self, frame, 'QR generator for Haiku!', B_TITLED_WINDOW, B_WILL_DRAW)
+		bounds = self.Bounds()
 		self.bar = BMenuBar(bounds, 'Bar')
 		x, barheight = self.bar.GetPreferredSize()
 		self.mkey = {}
@@ -115,7 +119,8 @@ class HaiQRWindow(BWindow):
 		
 	def QuitRequested(self):
 		print "So long and thanks for all the fish"
-		BApplication.be_app.WindowAt(0).PostMessage(B_QUIT_REQUESTED)
+		BApplication.be_app.PostMessage(B_QUIT_REQUESTED)
+		#BApplication.be_app.WindowAt(0).PostMessage(B_QUIT_REQUESTED)
 		return 1
 		
 		
