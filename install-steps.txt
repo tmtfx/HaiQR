@@ -1,0 +1,5 @@
+Bethon
+pkgman install pip_python
+pip install qrcode
+pip install pillow
+pip install backports.tempfile
