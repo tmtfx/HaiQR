@@ -48,15 +48,13 @@ try:
 #	from BCheckBox import BCheckBox
 	from BView import BView
 	from InterfaceKit import B_VERTICAL,B_FOLLOW_ALL,B_FOLLOW_TOP,B_FOLLOW_LEFT,B_FOLLOW_RIGHT,B_TRIANGLE_THUMB,B_BLOCK_THUMB,B_FLOATING_WINDOW,B_TITLED_WINDOW,B_WILL_DRAW,B_NAVIGABLE,B_FRAME_EVENTS,B_ALIGN_CENTER,B_FOLLOW_ALL_SIDES,B_MODAL_WINDOW,B_FOLLOW_TOP_BOTTOM,B_FOLLOW_BOTTOM,B_FOLLOW_LEFT_RIGHT,B_SINGLE_SELECTION_LIST,B_NOT_RESIZABLE,B_NOT_ZOOMABLE,B_PLAIN_BORDER,B_FANCY_BORDER,B_NO_BORDER,B_ITEMS_IN_COLUMN
-	from AppKit import B_QUIT_REQUESTED,B_KEY_UP,B_KEY_DOWN,B_MODIFIERS_CHANGED,B_UNMAPPED_KEY_DOWN
+	from AppKit import B_QUIT_REQUESTED,B_KEY_UP,B_KEY_DOWN,B_MODIFIERS_CHANGED,B_UNMAPPED_KEY_DOWN#,B_CLIPBOARD_CHANGED
 except:
 	print "your system lacks of Bethon modules"
 	jes = True
 
 if jes:
 	sys.exit(1)
-	
-	
 class PView(BView):
 	def __init__(self,frame,name,immagine):
 		self.immagine=immagine
@@ -71,8 +69,7 @@ class PView(BView):
 		
 class HaiQRWindow(BWindow):
 	Menus = (
-		('File', ((1, 'Generate from clipboard'),(2, 'Save QR'),(None, None),(B_QUIT_REQUESTED, 'Quit'))),
-		('View', ((5, 'Install on Deskbar'),(6, 'Remove from Deskbar'))),
+		('File', ((1, 'Generate QR'),(2, 'Save QR'),(None, None),(B_QUIT_REQUESTED, 'Quit'))),
 		('Help', ((4, 'Help'),(3, 'About')))
 		)
 		
@@ -98,15 +95,26 @@ class HaiQRWindow(BWindow):
 		##### COLOR GRAY UNDER LISTS
 		self.underlist = BBox((l, t + barheight, r, b), 'underlist', B_FOLLOW_ALL, B_WILL_DRAW|B_NAVIGABLE, B_NO_BORDER)
 		self.AddChild(self.underlist)
-# no no no!		notis = BClipboard(
+		##### PLACE TO PUT TEXT FOR QR GENERATOR #####
+#		self.inputbox = BBox((l+5 , b-barheight-40 , r-5  , b-barheight-5), 'inputbox', B_FOLLOW_TOP_BOTTOM, B_WILL_DRAW|B_NAVIGABLE, B_FANCY_BORDER)
+#		self.underlist.AddChild(self.inputbox)
+		self.Hintlabel= BStringView((l+7,b-barheight-40,70,b-barheight-10),"Label","Paste here:")
+		self.underlist.AddChild(self.Hintlabel)
+		self.tachetest=BTextControl((73,b-barheight-30,r-57,b-barheight-12),'TxTView', None,None,BMessage(1))
+#		self.inputbox.AddChild(self.tachetest)
+		self.underlist.AddChild(self.tachetest)
+		self.tachetest.MakeFocus(1)
+#		self.BUTTON_MSG = struct.unpack('!l', 'PRES')[0]
+		self.QRButton = BButton((r-53, b-barheight-32, r-5, b-barheight-10), "QRit", "QR it!", BMessage(1))
+		self.underlist.AddChild(self.QRButton)
 		#zonte pview
-		
+				
 		
 # MESSAGES 
 	def MessageReceived(self, msg):
 		if msg.what == 1:
 			#Gjenere QR
-			print("genero QR da clipboard")		
+			print("genero QR")		
 			return
 
 		if msg.what == 3:
@@ -114,6 +122,7 @@ class HaiQRWindow(BWindow):
 			self.About = AboutWindow()
 			self.About.Show()
 			return
+
 		
 		BWindow.MessageReceived(self, msg)
 		
