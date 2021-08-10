@@ -16,7 +16,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-import os,sys,struct
+import os,sys,struct,tempfile
 
 jes=False
 try:
@@ -52,14 +52,38 @@ try:
 except:
 	print "your system lacks of Bethon modules"
 	jes = True
+	
+try:
+	from backports import tempfile
+except:
+	print "your python environment lacks of backports.tempfile"
+	jes = True
+	
+try:
+	import qrcode
+except:
+	print "your python environment lacks of qrcode module"
+	jes = True
+try:
+	from PIL import Image
+except:
+	print "your python environment lacks of pillow module"
+	jes = True
 
 if jes:
 	sys.exit(1)
+
 class PView(BView):
 	def __init__(self,frame,name,immagine):
 		self.immagine=immagine
 		self.frame=frame
 		BView.__init__(self,self.frame,name,B_FOLLOW_ALL_SIDES,B_WILL_DRAW)
+		
+	def UpdateImg(self,immagine):
+		self.immagine=immagine
+		a,b,c,d=self.frame
+		rect=(0,0,c-a,d-b)
+		self.DrawBitmap(self.immagine,rect)
 
 	def Draw(self,rect):
 		BView.Draw(self,rect)
@@ -69,7 +93,7 @@ class PView(BView):
 		
 class HaiQRWindow(BWindow):
 	Menus = (
-		('File', ((1, 'Generate QR'),(2, 'Save QR'),(None, None),(B_QUIT_REQUESTED, 'Quit'))),
+		('File', ((1, 'Generate QR'),(2, 'Save QR'),(5, 'Add Logo'),(None, None),(B_QUIT_REQUESTED, 'Quit'))),
 		('Help', ((4, 'Help'),(3, 'About')))
 		)
 		
@@ -98,25 +122,44 @@ class HaiQRWindow(BWindow):
 		##### PLACE TO PUT TEXT FOR QR GENERATOR #####
 #		self.inputbox = BBox((l+5 , b-barheight-40 , r-5  , b-barheight-5), 'inputbox', B_FOLLOW_TOP_BOTTOM, B_WILL_DRAW|B_NAVIGABLE, B_FANCY_BORDER)
 #		self.underlist.AddChild(self.inputbox)
-		self.Hintlabel= BStringView((l+7,b-barheight-40,70,b-barheight-10),"Label","Paste here:")
+		self.Hintlabel= BStringView((l+7,b-barheight-40,70,b-barheight-10),"Label","Paste here:",B_FOLLOW_LEFT | B_FOLLOW_BOTTOM)
 		self.underlist.AddChild(self.Hintlabel)
-		self.tachetest=BTextControl((73,b-barheight-30,r-57,b-barheight-12),'TxTView', None,None,BMessage(1))
+		self.tachetest=BTextControl((73,b-barheight-30,r-57,b-barheight-12),'TxTView', None,None,BMessage(1),B_FOLLOW_LEFT_RIGHT | B_FOLLOW_BOTTOM) #B_FOLLOW_RIGHT 
 #		self.inputbox.AddChild(self.tachetest)
 		self.underlist.AddChild(self.tachetest)
 		self.tachetest.MakeFocus(1)
 #		self.BUTTON_MSG = struct.unpack('!l', 'PRES')[0]
-		self.QRButton = BButton((r-53, b-barheight-32, r-5, b-barheight-10), "QRit", "QR it!", BMessage(1))
+		self.QRButton = BButton((r-53, b-barheight-32, r-5, b-barheight-10), "QRit", "QR it!", BMessage(1), B_FOLLOW_RIGHT | B_FOLLOW_BOTTOM)
 		self.underlist.AddChild(self.QRButton)
+		self.qr = qrcode.QRCode(version=1,error_correction=qrcode.constants.ERROR_CORRECT_H,box_size=10,border=4)
 		#zonte pview
-				
+		self.qrframe=PView((l+15,t+15,r-15,b-70),"photoframe",None)
+		self.underlist.AddChild(self.qrframe)
+		self.imginmemory = False  #boolean that enables "save to disk" function				
 		
 # MESSAGES 
 	def MessageReceived(self, msg):
 		if msg.what == 1:
 			#Gjenere QR
-			print("genero QR")		
+			if self.tachetest.Text() != "":
+				self.imginmemory = True
+				self.qr.clear()
+				self.qr.add_data(self.tachetest.Text())
+				self.qr.make(fit=True)
+				self.qrimg=self.qr.make_image(fill_color="black",back_color="white").convert('RGB')
+				with tempfile.TemporaryDirectory() as temp_dir:
+				#dirlink = sys.path[0]+"/tmp"
+				#if not (os.path.isdir(dirlink)):
+				#	os.mkdir(dirlink)
+					link=temp_dir+"/tmp.png"
+					self.qrimg.save(link)
+					self.img=BTranslationUtils.GetBitmap(link)
+					self.qrframe.UpdateImg(self.img)
+				#BTranslationUtils.GetBitmap(self.qrimg)
 			return
-
+		if msg.what == 2:
+			if self.imginmemory:
+				self.qrimg.save("generatedQR.png")
 		if msg.what == 3:
 			#ABOUT
 			self.About = AboutWindow()
@@ -176,7 +219,7 @@ class HaiQRApplication(BApplication.BApplication):
 		BApplication.BApplication.__init__(self, "application/x-vnd.HaiQR")
 
 	def ReadyToRun(self):
-		window((100,80,800,600))
+		window((100,80,600,600))
 
 	def QuitRequested(self):
 		return 1
