@@ -47,7 +47,7 @@ try:
 	from BBitmap import BBitmap
 #	from BCheckBox import BCheckBox
 	from BView import BView
-	import BFilePanel
+	import BFilePanel, BEntry
 	from InterfaceKit import B_VERTICAL,B_FOLLOW_ALL,B_FOLLOW_TOP,B_FOLLOW_LEFT,B_FOLLOW_RIGHT,B_TRIANGLE_THUMB,B_BLOCK_THUMB,B_FLOATING_WINDOW,B_TITLED_WINDOW,B_WILL_DRAW,B_NAVIGABLE,B_FRAME_EVENTS,B_ALIGN_CENTER,B_FOLLOW_ALL_SIDES,B_MODAL_WINDOW,B_FOLLOW_TOP_BOTTOM,B_FOLLOW_BOTTOM,B_FOLLOW_LEFT_RIGHT,B_SINGLE_SELECTION_LIST,B_NOT_RESIZABLE,B_NOT_ZOOMABLE,B_PLAIN_BORDER,B_FANCY_BORDER,B_NO_BORDER,B_ITEMS_IN_COLUMN
 	from AppKit import B_QUIT_REQUESTED,B_KEY_UP,B_KEY_DOWN,B_MODIFIERS_CHANGED,B_UNMAPPED_KEY_DOWN,B_REFS_RECEIVED,B_SAVE_REQUESTED
 	from StorageKit import B_SAVE_PANEL,B_FILE_NODE
@@ -106,7 +106,6 @@ class HaiQRWindow(BWindow):
 		bounds = self.Bounds()
 		self.bar = BMenuBar(bounds, 'Bar')
 		x, barheight = self.bar.GetPreferredSize()
-		self.mkey = {}
 		for menu, items in self.Menus:
 			menu = BMenu(menu)
 			for k, name in items:
@@ -115,7 +114,6 @@ class HaiQRWindow(BWindow):
 				else:
 						msg = BMessage(k)
 						menu.AddItem(BMenuItem(name, msg))
-						self.mkey[k] = name
 			self.bar.AddItem(menu)
 		l, t, r, b = bounds
 		self.AddChild(self.bar)
@@ -145,13 +143,12 @@ class HaiQRWindow(BWindow):
 		#self.fp.SetSaveText("prova.png")
 		#self.fp.SetMessage(BMessage(1599230531))
 #		self.fp = PersonalFilePanel(B_SAVE_PANEL,None, None, B_FILE_NODE,False, None, None, True)
-	
+		self.ofp=BFilePanel.BFilePanel()
 
 
 		
 # MESSAGES 
 	def MessageReceived(self, msg):
-		print msg
 		if msg.what == 1:
 			#Gjenere QR
 			if self.tachetest.Text() != "":
@@ -177,6 +174,17 @@ class HaiQRWindow(BWindow):
 			self.About = AboutWindow()
 			self.About.Show()
 			return
+		if msg.what == 5:
+			#ADD OR REMOVE LOGO
+			if self.bar.FindItem("Add Logo").IsMarked():
+				self.bar.FindItem("Add Logo").SetMarked(0)
+				#remove logo
+			else:
+				self.bar.FindItem("Add Logo").SetMarked(1)
+				#add logo
+				self.ofp.Show()
+				
+
 		if msg.what == B_SAVE_REQUESTED:
 			print "passo di qui?"
 
@@ -246,7 +254,9 @@ class HaiQRApplication(BApplication.BApplication):
 			while 1:
 				try:
 					e = msg.FindRef("refs", i)
-					print e
+					bpatho= BEntry.BEntry(e,True).GetPath()
+					txtpath= bpatho.Path()
+					print txtpath
 				except: #BMessage.error, val:
 					e = None
 				if e is None:
