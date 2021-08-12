@@ -31,19 +31,19 @@ try:
 	from BBox import BBox
 	from BButton import BButton
 	from BMenuBar import BMenuBar
-	from BPopUpMenu import BPopUpMenu
+#	from BPopUpMenu import BPopUpMenu
 	from BSeparatorItem import BSeparatorItem
 	from BStringView import BStringView
 #	from BSlider import BSlider
 	from BTextView import BTextView
 	from BFont import be_plain_font, be_bold_font
 	from BTextControl import BTextControl
-	from BAlert import BAlert
+#	from BAlert import BAlert
 #	from BListItem import BListItem
 #	from BStatusBar import BStatusBar
 	from StorageKit import *
 	from BTranslationUtils import *
-	from BFile import BFile
+#	from BFile import BFile
 	from BBitmap import BBitmap
 #	from BCheckBox import BCheckBox
 	from BView import BView
@@ -126,18 +126,20 @@ class HaiQRWindow(BWindow):
 		self.tachetest=BTextControl((73,b-barheight-30,r-57,b-barheight-12),'TxTView', None,None,BMessage(1),B_FOLLOW_LEFT_RIGHT | B_FOLLOW_BOTTOM)
 		self.underlist.AddChild(self.tachetest)
 		self.tachetest.MakeFocus(1)
-#		self.BUTTON_MSG = struct.unpack('!l', 'PRES')[0]
+		#self.BUTTON_MSG = struct.unpack('!l', 'PRES')[0]
 		self.QRButton = BButton((r-53, b-barheight-32, r-5, b-barheight-10), "QRit", "QR it!", BMessage(1), B_FOLLOW_RIGHT | B_FOLLOW_BOTTOM)
 		self.underlist.AddChild(self.QRButton)
 		self.qr = qrcode.QRCode(version=1,error_correction=qrcode.constants.ERROR_CORRECT_H,box_size=10,border=4)
-		#zonte pview
+		###### PLACE FOR GENERATED QRs
 		self.qrframe=PView((l+15,t+15,r-15,b-70),"photoframe",None)
 		self.underlist.AddChild(self.qrframe)
-		#self.imginmemory = False  #boolean that enables "save to disk" function
+		###### SAVE PANEL
 		self.fp=BFilePanel.BFilePanel(B_SAVE_PANEL)
 		self.fp.SetPanelDirectory("/boot/home/Desktop")
 		self.fp.SetSaveText("prova.png")
+		###### OPEN PANEL
 		self.ofp=BFilePanel.BFilePanel()
+		###### VARIABLES
 		self.logopath = ""
 		self.qrcreated = False
 		self.CanOpenPanel=True
@@ -165,20 +167,24 @@ class HaiQRWindow(BWindow):
 					self.img=BTranslationUtils.GetBitmap(link)
 					self.qrframe.UpdateImg(self.img)
 					self.qrcreated = True
-
 			return
+			
 		if msg.what == 2:
 			#SaveFilePanel
 			if self.qrcreated:
 				self.CanOpenPanel=False
 				self.fp.Show()
+				BApplication.be_app.PostMessage(BMessage(11))
+			return
 
 		if msg.what == 54173:
+			#Save qr
 			txt=self.fp.GetPanelDirectory()
 			savepath= BEntry.BEntry(txt,True).GetPath().Path()
 			e = msg.FindString("name")
 			completepath = savepath +"/"+ e
 			self.qrimg.save(completepath)
+			return
 
 		if msg.what == 3:
 			#ABOUT
@@ -211,6 +217,7 @@ class HaiQRWindow(BWindow):
 
 		if msg.what == 6:
 			self.CanOpenPanel=True
+			return
 			
 		if msg.what == 112:
 			self.logopath = msg.FindString("path=")
@@ -222,7 +229,6 @@ class HaiQRWindow(BWindow):
 	def QuitRequested(self):
 		print "So long and thanks for all the fish"
 		BApplication.be_app.PostMessage(B_QUIT_REQUESTED)
-		#BApplication.be_app.WindowAt(0).PostMessage(B_QUIT_REQUESTED)
 		return 1
 
 		
@@ -271,6 +277,7 @@ class HaiQRApplication(BApplication.BApplication):
 
 	def ReadyToRun(self):
 		window((100,80,600,600))
+		
 # REF MESSAGES OpenFilePanel		
 	def RefsReceived(self, msg):
 		#msg.PrintToStream()
@@ -307,6 +314,11 @@ class HaiQRApplication(BApplication.BApplication):
 				#se file viert inzorne imagjin
 				BApplication.be_app.WindowAt(0).PostMessage(BMessage(4))
 				BApplication.be_app.WindowAt(0).PostMessage(BMessage(6))
+			return
+			
+		if msg.what == 11:
+			#Fix for bug: "Default button" is disabled on fp.Show()
+			BApplication.be_app.WindowAt(1).PostMessage(B_KEY_DOWN)
 			return
 			
 		if msg.what == 311:
