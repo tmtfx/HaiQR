@@ -121,12 +121,9 @@ class HaiQRWindow(BWindow):
 		self.underlist = BBox((l, t + barheight, r, b), 'underlist', B_FOLLOW_ALL, B_WILL_DRAW|B_NAVIGABLE, B_NO_BORDER)
 		self.AddChild(self.underlist)
 		##### PLACE TO PUT TEXT FOR QR GENERATOR #####
-#		self.inputbox = BBox((l+5 , b-barheight-40 , r-5  , b-barheight-5), 'inputbox', B_FOLLOW_TOP_BOTTOM, B_WILL_DRAW|B_NAVIGABLE, B_FANCY_BORDER)
-#		self.underlist.AddChild(self.inputbox)
 		self.Hintlabel= BStringView((l+7,b-barheight-40,70,b-barheight-10),"Label","Paste here:",B_FOLLOW_LEFT | B_FOLLOW_BOTTOM)
 		self.underlist.AddChild(self.Hintlabel)
 		self.tachetest=BTextControl((73,b-barheight-30,r-57,b-barheight-12),'TxTView', None,None,BMessage(10),B_FOLLOW_LEFT_RIGHT | B_FOLLOW_BOTTOM) #B_FOLLOW_RIGHT 
-#		self.inputbox.AddChild(self.tachetest)
 		self.underlist.AddChild(self.tachetest)
 		self.tachetest.MakeFocus(1)
 #		self.BUTTON_MSG = struct.unpack('!l', 'PRES')[0]
@@ -185,15 +182,12 @@ class HaiQRWindow(BWindow):
 					self.bar.FindItem("Add Logo").SetMarked(1)
 					#add logo
 					self.ofp.Show()
-		if msg.what == B_ENTER:
-			#Se o frachi Invie o prepari il QR
-			if self.tachetest != "":
-				print "Gjenere il QR cun Invie"
-				BApplication.be_app.WindowAt(0).PostMessage(BMessage(1))
-			return
-#		if msg.what == 10:
-#			print self.tachetest.KeyDown()
-#			print "siamo fighi o no?"
+#		if msg.what == B_ENTER:
+#			#Se o frachi Invie o prepari il QR
+#			if self.tachetest != "":
+#				print "Gjenere il QR cun Invie"
+#				BApplication.be_app.WindowAt(0).PostMessage(BMessage(1))
+#			return
 		if msg.what == B_SAVE_REQUESTED:
 			print "passo di qui?"
 			return
@@ -201,12 +195,7 @@ class HaiQRWindow(BWindow):
 			print "ricevuto 112"
 			txt = msg.FindString("path=")
 			print txt
-#		else:
-#			try:
-#				msg.PrintToStream()
-#			except:
-#				pass
-
+			return
 		BWindow.MessageReceived(self, msg)
 		
 
