@@ -139,19 +139,17 @@ class HaiQRWindow(BWindow):
 		self.qrframe=PView((l+15,t+15,r-15,b-70),"photoframe",None)
 		self.underlist.AddChild(self.qrframe)
 		self.imginmemory = False  #boolean that enables "save to disk" function
-		self.fp=BFilePanel.BFilePanel()#B_SAVE_PANEL,None, None, B_FILE_NODE,False, None, None, True)
-		#print self.fp.PanelMode #= B_SAVE_PANEL
+		self.fp=BFilePanel.BFilePanel(B_SAVE_PANEL)
 		self.fp.SetPanelDirectory("/boot/home/Desktop")
-		#self.fp.SetSaveText("prova.png")
-		#self.fp.SetMessage(BMessage(1599230531))
-#		self.fp = PersonalFilePanel(B_SAVE_PANEL,None, None, B_FILE_NODE,False, None, None, True)
+		self.fp.SetSaveText("prova.png")
+		#self.savebtn = self.fp.Window().ChildAt(0).FindView("default button");
+
 	
 
 
 		
 # MESSAGES 
 	def MessageReceived(self, msg):
-		print msg
 		if msg.what == 1:
 			#Gjenere QR
 			if self.tachetest.Text() != "":
@@ -168,17 +166,20 @@ class HaiQRWindow(BWindow):
 
 			return
 		if msg.what == 2:
+			#SaveFilePanel
 			if self.imginmemory:
 				self.fp.Show()
-				print "dovrebbe comparire"
-				#self.qrimg.save("generatedQR.png")
+		if msg.what == 54173:
+			txt=self.fp.GetPanelDirectory()
+			print "procedo a salvare"
+			print txt
+			
+
 		if msg.what == 3:
 			#ABOUT
 			self.About = AboutWindow()
 			self.About.Show()
 			return
-		if msg.what == B_SAVE_REQUESTED:
-			print "passo di qui?"
 
 		BWindow.MessageReceived(self, msg)
 		
@@ -188,12 +189,7 @@ class HaiQRWindow(BWindow):
 		BApplication.be_app.PostMessage(B_QUIT_REQUESTED)
 		#BApplication.be_app.WindowAt(0).PostMessage(B_QUIT_REQUESTED)
 		return 1
-		
-#class PersonalFilePanel(BFilePanel):
-#	def __init__(self,fpMode,messenger, directory, nodeFlavour,allowMultiSelect, Message, Filter, makeModal):
-#		BFilePanel.__init__(self,fpMode,None, None, nodeFlavour,allowMultiSelect, None, None, makeModal)
-#		self.SetPanelDirectory("/boot/home/Desktop")
-#		self.SetSaveText("prova.png")
+
 		
 class AboutWindow(BWindow):
 	kWindowFrame = (150, 150, 650, 620)
@@ -238,7 +234,7 @@ class HaiQRApplication(BApplication.BApplication):
 
 	def ReadyToRun(self):
 		window((100,80,600,600))
-# REF MESSAGES		
+# REF MESSAGES OpenFilePanel		
 	def RefsReceived(self, msg):
 		msg.PrintToStream()
 		if msg.what == B_REFS_RECEIVED:
@@ -252,7 +248,12 @@ class HaiQRApplication(BApplication.BApplication):
 				if e is None:
 					break
 				i = i + 1
-
+				
+	def MessageReceived(self, msg):
+		if msg.what == B_SAVE_REQUESTED:
+			#x = self.window.fp.GetPanelDirectory()
+			BApplication.be_app.WindowAt(0).PostMessage(54173)
+			
 	def QuitRequested(self):
 		return 1
 		
