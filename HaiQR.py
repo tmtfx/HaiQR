@@ -138,6 +138,8 @@ class HaiQRWindow(BWindow):
 		self.fp.SetPanelDirectory("/boot/home/Desktop")
 		self.fp.SetSaveText("prova.png")
 		self.ofp=BFilePanel.BFilePanel()
+		self.logopath = ""
+		self.qrcreated = False
 
 
 		
@@ -151,17 +153,25 @@ class HaiQRWindow(BWindow):
 				self.qr.add_data(self.tachetest.Text())
 				self.qr.make(fit=True)
 				self.qrimg=self.qr.make_image(fill_color="black",back_color="white").convert('RGB')
+				print self.logopath
+				if self.logopath != "":
+					logo_display = Image.open(self.logopath)
+					logo_display.thumbnail((60, 60))
+					logo_pos = ((self.qrimg.size[0] - logo_display.size[0]) // 2, (self.qrimg.size[1] - logo_display.size[1]) // 2)
+					self.qrimg.paste(logo_display, logo_pos)
 				with tempfile.TemporaryDirectory() as temp_dir:
 					link=temp_dir+"/tmp.png"
 					self.qrimg.save(link)
 					self.img=BTranslationUtils.GetBitmap(link)
 					self.qrframe.UpdateImg(self.img)
+					self.qrcreated = True
 
 			return
 		if msg.what == 2:
 			#SaveFilePanel
-			if self.imginmemory:
+			if self.qrcreated:
 				self.fp.Show()
+
 		if msg.what == 54173:
 			txt=self.fp.GetPanelDirectory()
 			print "procedo a salvare"
@@ -173,31 +183,40 @@ class HaiQRWindow(BWindow):
 			self.About = AboutWindow()
 			self.About.Show()
 			return
-		
+			
+		if msg.what == 4:
+			print self.qrcreated
+			if self.qrcreated:
+				BApplication.be_app.WindowAt(0).PostMessage(BMessage(1))
+			return
+				
 		if msg.what == 5:
 			if not(self.ofp.IsShowing()):
 			#ADD OR REMOVE LOGO
 				if self.bar.FindItem("Add Logo").IsMarked():
+					#remove logo
+					self.logopath=""
 					self.bar.FindItem("Add Logo").SetMarked(0)
 					BApplication.be_app.PostMessage(BMessage(311))
-					#remove logo
+					if self.qrcreated:
+						BApplication.be_app.WindowAt(0).PostMessage(BMessage(1))
 				else:
-					self.bar.FindItem("Add Logo").SetMarked(1)
 					#add logo
+					self.bar.FindItem("Add Logo").SetMarked(1)
 					self.ofp.Show()
+			return
 #		if msg.what == B_ENTER:
 #			#Se o frachi Invie o prepari il QR
 #			if self.tachetest != "":
 #				print "Gjenere il QR cun Invie"
 #				BApplication.be_app.WindowAt(0).PostMessage(BMessage(1))
 #			return
-		if msg.what == B_SAVE_REQUESTED:
+			
+		if msg.what == 54173:
 			print "passo di qui?"
 			return
 		if msg.what == 112:
-			print "ricevuto 112"
-			txt = msg.FindString("path=")
-			print txt
+			self.logopath = msg.FindString("path=")
 			return
 
 		BWindow.MessageReceived(self, msg)
@@ -277,13 +296,21 @@ class HaiQRApplication(BApplication.BApplication):
 		if msg.what == B_SAVE_REQUESTED:
 			#x = self.window.fp.GetPanelDirectory()
 			BApplication.be_app.WindowAt(0).PostMessage(54173)
+			return
 			
-	def MessageReceived(self, msg):
 		if msg.what == B_CANCEL:
 			if self.txtpath=="":
+				#se nissun file viert beh?!??
 				BApplication.be_app.WindowAt(0).PostMessage(BMessage(5))
-		elif msg.what == 311:
-				self.txtpath = ""
+				print "passo a 5"
+			else:
+				#se file viert inzorne imagjin
+				BApplication.be_app.WindowAt(0).PostMessage(BMessage(4))
+				print "passo a 4"
+			return		
+		if msg.what == 311:
+			self.txtpath = ""
+			return
 			
 	def QuitRequested(self):
 		return 1
