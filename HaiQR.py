@@ -140,6 +140,7 @@ class HaiQRWindow(BWindow):
 		self.ofp=BFilePanel.BFilePanel()
 		self.logopath = ""
 		self.qrcreated = False
+		self.CanOpenPanel=True
 
 
 		
@@ -153,7 +154,6 @@ class HaiQRWindow(BWindow):
 				self.qr.add_data(self.tachetest.Text())
 				self.qr.make(fit=True)
 				self.qrimg=self.qr.make_image(fill_color="black",back_color="white").convert('RGB')
-				print self.logopath
 				if self.logopath != "":
 					logo_display = Image.open(self.logopath)
 					logo_display.thumbnail((60, 60))
@@ -170,12 +170,17 @@ class HaiQRWindow(BWindow):
 		if msg.what == 2:
 			#SaveFilePanel
 			if self.qrcreated:
+				self.CanOpenPanel=False
 				self.fp.Show()
 
 		if msg.what == 54173:
 			txt=self.fp.GetPanelDirectory()
-			print "procedo a salvare"
-			print txt
+			savepath= BEntry.BEntry(txt,True).GetPath().Path()
+			e = msg.FindString("name")
+			completepath = savepath +"/"+ e
+			print ("procedo a salvare " + completepath)
+			self.qrimg.save(completepath)
+			#print savepath.Path()
 			
 
 		if msg.what == 3:
@@ -185,7 +190,6 @@ class HaiQRWindow(BWindow):
 			return
 			
 		if msg.what == 4:
-			print self.qrcreated
 			if self.qrcreated:
 				BApplication.be_app.WindowAt(0).PostMessage(BMessage(1))
 			return
@@ -201,9 +205,11 @@ class HaiQRWindow(BWindow):
 					if self.qrcreated:
 						BApplication.be_app.WindowAt(0).PostMessage(BMessage(1))
 				else:
-					#add logo
-					self.bar.FindItem("Add Logo").SetMarked(1)
-					self.ofp.Show()
+					if self.CanOpenPanel:
+						#add logo
+						self.bar.FindItem("Add Logo").SetMarked(1)
+						self.ofp.Show()
+						self.CanOpenPanel=False
 			return
 #		if msg.what == B_ENTER:
 #			#Se o frachi Invie o prepari il QR
@@ -211,10 +217,9 @@ class HaiQRWindow(BWindow):
 #				print "Gjenere il QR cun Invie"
 #				BApplication.be_app.WindowAt(0).PostMessage(BMessage(1))
 #			return
+		if msg.what == 6:
+			self.CanOpenPanel=True
 			
-		if msg.what == 54173:
-			print "passo di qui?"
-			return
 		if msg.what == 112:
 			self.logopath = msg.FindString("path=")
 			return
@@ -295,19 +300,24 @@ class HaiQRApplication(BApplication.BApplication):
 	def MessageReceived(self, msg):
 		if msg.what == B_SAVE_REQUESTED:
 			#x = self.window.fp.GetPanelDirectory()
-			BApplication.be_app.WindowAt(0).PostMessage(54173)
+			e = msg.FindString("name")
+			messaggio = BMessage(54173)
+			messaggio.AddString("name",e)
+			BApplication.be_app.WindowAt(0).PostMessage(messaggio)
 			return
 			
 		if msg.what == B_CANCEL:
 			if self.txtpath=="":
-				#se nissun file viert beh?!??
+				#se nissun file di salvaa
 				BApplication.be_app.WindowAt(0).PostMessage(BMessage(5))
-				print "passo a 5"
+				BApplication.be_app.WindowAt(0).PostMessage(BMessage(6))
 			else:
 				#se file viert inzorne imagjin
 				BApplication.be_app.WindowAt(0).PostMessage(BMessage(4))
-				print "passo a 4"
-			return		
+				BApplication.be_app.WindowAt(0).PostMessage(BMessage(6))
+			return
+		if msg.what == B_STRING_TYPE:
+			print "waaa"
 		if msg.what == 311:
 			self.txtpath = ""
 			return
