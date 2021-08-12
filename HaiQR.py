@@ -106,7 +106,6 @@ class HaiQRWindow(BWindow):
 		bounds = self.Bounds()
 		self.bar = BMenuBar(bounds, 'Bar')
 		x, barheight = self.bar.GetPreferredSize()
-		self.mkey = {}
 		for menu, items in self.Menus:
 			menu = BMenu(menu)
 			for k, name in items:
@@ -115,7 +114,6 @@ class HaiQRWindow(BWindow):
 				else:
 						msg = BMessage(k)
 						menu.AddItem(BMenuItem(name, msg))
-						self.mkey[k] = name
 			self.bar.AddItem(menu)
 		l, t, r, b = bounds
 		self.AddChild(self.bar)
@@ -123,12 +121,9 @@ class HaiQRWindow(BWindow):
 		self.underlist = BBox((l, t + barheight, r, b), 'underlist', B_FOLLOW_ALL, B_WILL_DRAW|B_NAVIGABLE, B_NO_BORDER)
 		self.AddChild(self.underlist)
 		##### PLACE TO PUT TEXT FOR QR GENERATOR #####
-#		self.inputbox = BBox((l+5 , b-barheight-40 , r-5  , b-barheight-5), 'inputbox', B_FOLLOW_TOP_BOTTOM, B_WILL_DRAW|B_NAVIGABLE, B_FANCY_BORDER)
-#		self.underlist.AddChild(self.inputbox)
 		self.Hintlabel= BStringView((l+7,b-barheight-40,70,b-barheight-10),"Label","Paste here:",B_FOLLOW_LEFT | B_FOLLOW_BOTTOM)
 		self.underlist.AddChild(self.Hintlabel)
-		self.tachetest=BTextControl((73,b-barheight-30,r-57,b-barheight-12),'TxTView', None,None,BMessage(1),B_FOLLOW_LEFT_RIGHT | B_FOLLOW_BOTTOM) #B_FOLLOW_RIGHT 
-#		self.inputbox.AddChild(self.tachetest)
+		self.tachetest=BTextControl((73,b-barheight-30,r-57,b-barheight-12),'TxTView', None,None,BMessage(1),B_FOLLOW_LEFT_RIGHT | B_FOLLOW_BOTTOM)
 		self.underlist.AddChild(self.tachetest)
 		self.tachetest.MakeFocus(1)
 #		self.BUTTON_MSG = struct.unpack('!l', 'PRES')[0]
@@ -142,9 +137,7 @@ class HaiQRWindow(BWindow):
 		self.fp=BFilePanel.BFilePanel(B_SAVE_PANEL)
 		self.fp.SetPanelDirectory("/boot/home/Desktop")
 		self.fp.SetSaveText("prova.png")
-		#self.savebtn = self.fp.Window().ChildAt(0).FindView("default button");
-
-	
+		self.ofp=BFilePanel.BFilePanel()
 
 
 		
@@ -179,6 +172,32 @@ class HaiQRWindow(BWindow):
 			#ABOUT
 			self.About = AboutWindow()
 			self.About.Show()
+			return
+		
+		if msg.what == 5:
+			if not(self.ofp.IsShowing()):
+			#ADD OR REMOVE LOGO
+				if self.bar.FindItem("Add Logo").IsMarked():
+					self.bar.FindItem("Add Logo").SetMarked(0)
+					BApplication.be_app.PostMessage(BMessage(311))
+					#remove logo
+				else:
+					self.bar.FindItem("Add Logo").SetMarked(1)
+					#add logo
+					self.ofp.Show()
+#		if msg.what == B_ENTER:
+#			#Se o frachi Invie o prepari il QR
+#			if self.tachetest != "":
+#				print "Gjenere il QR cun Invie"
+#				BApplication.be_app.WindowAt(0).PostMessage(BMessage(1))
+#			return
+		if msg.what == B_SAVE_REQUESTED:
+			print "passo di qui?"
+			return
+		if msg.what == 112:
+			print "ricevuto 112"
+			txt = msg.FindString("path=")
+			print txt
 			return
 
 		BWindow.MessageReceived(self, msg)
@@ -231,18 +250,23 @@ class HaiQRApplication(BApplication.BApplication):
 
 	def __init__(self):
 		BApplication.BApplication.__init__(self, "application/x-vnd.HaiQR")
+		self.txtpath=""
 
 	def ReadyToRun(self):
 		window((100,80,600,600))
 # REF MESSAGES OpenFilePanel		
 	def RefsReceived(self, msg):
-		msg.PrintToStream()
+		#msg.PrintToStream()
 		if msg.what == B_REFS_RECEIVED:
 			i = 0
 			while 1:
 				try:
 					e = msg.FindRef("refs", i)
-					print e
+					bpatho= BEntry.BEntry(e,True).GetPath()
+					self.txtpath= bpatho.Path()
+					a=BMessage(112)
+					a.AddString("path=",self.txtpath)
+					BApplication.be_app.WindowAt(0).PostMessage(a)
 				except: #BMessage.error, val:
 					e = None
 				if e is None:
@@ -253,6 +277,13 @@ class HaiQRApplication(BApplication.BApplication):
 		if msg.what == B_SAVE_REQUESTED:
 			#x = self.window.fp.GetPanelDirectory()
 			BApplication.be_app.WindowAt(0).PostMessage(54173)
+			
+	def MessageReceived(self, msg):
+		if msg.what == B_CANCEL:
+			if self.txtpath=="":
+				BApplication.be_app.WindowAt(0).PostMessage(BMessage(5))
+		elif msg.what == 311:
+				self.txtpath = ""
 			
 	def QuitRequested(self):
 		return 1
