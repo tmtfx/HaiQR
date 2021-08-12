@@ -48,8 +48,8 @@ try:
 #	from BCheckBox import BCheckBox
 	from BView import BView
 	import BFilePanel, BEntry
-	from InterfaceKit import B_VERTICAL,B_FOLLOW_ALL,B_FOLLOW_TOP,B_FOLLOW_LEFT,B_FOLLOW_RIGHT,B_TRIANGLE_THUMB,B_BLOCK_THUMB,B_FLOATING_WINDOW,B_TITLED_WINDOW,B_WILL_DRAW,B_NAVIGABLE,B_FRAME_EVENTS,B_ALIGN_CENTER,B_FOLLOW_ALL_SIDES,B_MODAL_WINDOW,B_FOLLOW_TOP_BOTTOM,B_FOLLOW_BOTTOM,B_FOLLOW_LEFT_RIGHT,B_SINGLE_SELECTION_LIST,B_NOT_RESIZABLE,B_NOT_ZOOMABLE,B_PLAIN_BORDER,B_FANCY_BORDER,B_NO_BORDER,B_ITEMS_IN_COLUMN
-	from AppKit import B_QUIT_REQUESTED,B_KEY_UP,B_KEY_DOWN,B_MODIFIERS_CHANGED,B_UNMAPPED_KEY_DOWN,B_REFS_RECEIVED,B_SAVE_REQUESTED
+	from InterfaceKit import B_VERTICAL,B_FOLLOW_ALL,B_FOLLOW_TOP,B_FOLLOW_LEFT,B_FOLLOW_RIGHT,B_TRIANGLE_THUMB,B_BLOCK_THUMB,B_FLOATING_WINDOW,B_TITLED_WINDOW,B_WILL_DRAW,B_NAVIGABLE,B_FRAME_EVENTS,B_ALIGN_CENTER,B_FOLLOW_ALL_SIDES,B_MODAL_WINDOW,B_FOLLOW_TOP_BOTTOM,B_FOLLOW_BOTTOM,B_FOLLOW_LEFT_RIGHT,B_SINGLE_SELECTION_LIST,B_NOT_RESIZABLE,B_NOT_ZOOMABLE,B_PLAIN_BORDER,B_FANCY_BORDER,B_NO_BORDER,B_ITEMS_IN_COLUMN,B_ENTER
+	from AppKit import B_QUIT_REQUESTED,B_KEY_UP,B_KEY_DOWN,B_MODIFIERS_CHANGED,B_UNMAPPED_KEY_DOWN,B_REFS_RECEIVED,B_SAVE_REQUESTED,B_CANCEL
 	from StorageKit import B_SAVE_PANEL,B_FILE_NODE
 	from SupportKit import B_ERROR
 except:
@@ -125,7 +125,7 @@ class HaiQRWindow(BWindow):
 #		self.underlist.AddChild(self.inputbox)
 		self.Hintlabel= BStringView((l+7,b-barheight-40,70,b-barheight-10),"Label","Paste here:",B_FOLLOW_LEFT | B_FOLLOW_BOTTOM)
 		self.underlist.AddChild(self.Hintlabel)
-		self.tachetest=BTextControl((73,b-barheight-30,r-57,b-barheight-12),'TxTView', None,None,BMessage(1),B_FOLLOW_LEFT_RIGHT | B_FOLLOW_BOTTOM) #B_FOLLOW_RIGHT 
+		self.tachetest=BTextControl((73,b-barheight-30,r-57,b-barheight-12),'TxTView', None,None,BMessage(10),B_FOLLOW_LEFT_RIGHT | B_FOLLOW_BOTTOM) #B_FOLLOW_RIGHT 
 #		self.inputbox.AddChild(self.tachetest)
 		self.underlist.AddChild(self.tachetest)
 		self.tachetest.MakeFocus(1)
@@ -175,18 +175,37 @@ class HaiQRWindow(BWindow):
 			self.About.Show()
 			return
 		if msg.what == 5:
+			if not(self.ofp.IsShowing()):
 			#ADD OR REMOVE LOGO
-			if self.bar.FindItem("Add Logo").IsMarked():
-				self.bar.FindItem("Add Logo").SetMarked(0)
-				#remove logo
-			else:
-				self.bar.FindItem("Add Logo").SetMarked(1)
-				#add logo
-				self.ofp.Show()
-				
-
+				if self.bar.FindItem("Add Logo").IsMarked():
+					self.bar.FindItem("Add Logo").SetMarked(0)
+					BApplication.be_app.PostMessage(BMessage(311))
+					#remove logo
+				else:
+					self.bar.FindItem("Add Logo").SetMarked(1)
+					#add logo
+					self.ofp.Show()
+		if msg.what == B_ENTER:
+			#Se o frachi Invie o prepari il QR
+			if self.tachetest != "":
+				print "Gjenere il QR cun Invie"
+				BApplication.be_app.WindowAt(0).PostMessage(BMessage(1))
+			return
+#		if msg.what == 10:
+#			print self.tachetest.KeyDown()
+#			print "siamo fighi o no?"
 		if msg.what == B_SAVE_REQUESTED:
 			print "passo di qui?"
+			return
+		if msg.what == 112:
+			print "ricevuto 112"
+			txt = msg.FindString("path=")
+			print txt
+#		else:
+#			try:
+#				msg.PrintToStream()
+#			except:
+#				pass
 
 		BWindow.MessageReceived(self, msg)
 		
@@ -197,11 +216,6 @@ class HaiQRWindow(BWindow):
 		#BApplication.be_app.WindowAt(0).PostMessage(B_QUIT_REQUESTED)
 		return 1
 		
-#class PersonalFilePanel(BFilePanel):
-#	def __init__(self,fpMode,messenger, directory, nodeFlavour,allowMultiSelect, Message, Filter, makeModal):
-#		BFilePanel.__init__(self,fpMode,None, None, nodeFlavour,allowMultiSelect, None, None, makeModal)
-#		self.SetPanelDirectory("/boot/home/Desktop")
-#		self.SetSaveText("prova.png")
 		
 class AboutWindow(BWindow):
 	kWindowFrame = (150, 150, 650, 620)
@@ -243,25 +257,35 @@ class HaiQRApplication(BApplication.BApplication):
 
 	def __init__(self):
 		BApplication.BApplication.__init__(self, "application/x-vnd.HaiQR")
+		self.txtpath=""
 
 	def ReadyToRun(self):
 		window((100,80,600,600))
 # REF MESSAGES		
 	def RefsReceived(self, msg):
-		msg.PrintToStream()
+		#msg.PrintToStream()
 		if msg.what == B_REFS_RECEIVED:
 			i = 0
 			while 1:
 				try:
 					e = msg.FindRef("refs", i)
 					bpatho= BEntry.BEntry(e,True).GetPath()
-					txtpath= bpatho.Path()
-					print txtpath
+					self.txtpath= bpatho.Path()
+					a=BMessage(112)
+					a.AddString("path=",self.txtpath)
+					BApplication.be_app.WindowAt(0).PostMessage(a)
 				except: #BMessage.error, val:
 					e = None
 				if e is None:
 					break
 				i = i + 1
+	def MessageReceived(self, msg):
+		if msg.what == B_CANCEL:
+			if self.txtpath=="":
+				BApplication.be_app.WindowAt(0).PostMessage(BMessage(5))
+		elif msg.what == 311:
+				self.txtpath = ""
+
 
 	def QuitRequested(self):
 		return 1
