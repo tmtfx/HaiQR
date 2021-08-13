@@ -299,11 +299,6 @@ class HaiQRApplication(BApplication.BApplication):
 				try:
 					e = msg.FindRef("refs", i)
 					entryref = BEntry.BEntry(e,True)
-					#grop = BNode.BNode(entryref)
-					#gropinfo = BNodeInfo.BNodeInfo(grop)
-					#gropinfo.GetPreferredApp()
-					#print "passo o no?"
-					#print x
 					bpatho= entryref.GetPath()
 					self.txtpath= bpatho.Path()
 					###### CHECK FOR IMAGE MIME TYPE
@@ -315,7 +310,16 @@ class HaiQRApplication(BApplication.BApplication):
 						if mime.IsInstalled():
 							pass #I can use the image
 						else:
-							break #I cannot use this image
+							#I cannot use this image
+							z = BAlert('Nimg', 'I cannot use this image\nSelect another one?', 'Yes', 'No', None, 3)
+							ret = z.Go()
+							if ret == 1:
+								break # aborts adding logo
+							else:
+								# Retry: open panel
+								BApplication.be_app.WindowAt(0).PostMessage(6)
+								BApplication.be_app.WindowAt(0).PostMessage(5)
+								break
 					else:
 						#"It's not an image"
 						BApplication.be_app.WindowAt(0).PostMessage(5)
