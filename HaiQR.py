@@ -22,8 +22,6 @@ jes=False
 try:
 	import BApplication,SupportKit
 	from BStringItem import BStringItem
-#	from BListView import BListView
-#	from BScrollView import BScrollView
 	from BWindow import BWindow
 	from BMessage import BMessage
 	from BMenuItem import BMenuItem
@@ -31,27 +29,22 @@ try:
 	from BBox import BBox
 	from BButton import BButton
 	from BMenuBar import BMenuBar
-#	from BPopUpMenu import BPopUpMenu
 	from BSeparatorItem import BSeparatorItem
 	from BStringView import BStringView
-#	from BSlider import BSlider
 	from BTextView import BTextView
 	from BFont import be_plain_font, be_bold_font
 	from BTextControl import BTextControl
-#	from BAlert import BAlert
-#	from BListItem import BListItem
-#	from BStatusBar import BStatusBar
+	from BAlert import BAlert
 	from StorageKit import *
 	from BTranslationUtils import *
-#	from BFile import BFile
+	from BMimeType import BMimeType
 	from BBitmap import BBitmap
-#	from BCheckBox import BCheckBox
 	from BView import BView
 	import BFilePanel, BEntry
 	from InterfaceKit import B_VERTICAL,B_FOLLOW_ALL,B_FOLLOW_TOP,B_FOLLOW_LEFT,B_FOLLOW_RIGHT,B_TRIANGLE_THUMB,B_BLOCK_THUMB,B_FLOATING_WINDOW,B_TITLED_WINDOW,B_WILL_DRAW,B_NAVIGABLE,B_FRAME_EVENTS,B_ALIGN_CENTER,B_FOLLOW_ALL_SIDES,B_MODAL_WINDOW,B_FOLLOW_TOP_BOTTOM,B_FOLLOW_BOTTOM,B_FOLLOW_LEFT_RIGHT,B_SINGLE_SELECTION_LIST,B_NOT_RESIZABLE,B_NOT_ZOOMABLE,B_PLAIN_BORDER,B_FANCY_BORDER,B_NO_BORDER,B_ITEMS_IN_COLUMN,B_ENTER
 	from AppKit import B_QUIT_REQUESTED,B_KEY_UP,B_KEY_DOWN,B_MODIFIERS_CHANGED,B_UNMAPPED_KEY_DOWN,B_REFS_RECEIVED,B_SAVE_REQUESTED,B_CANCEL
-	from StorageKit import B_SAVE_PANEL,B_FILE_NODE
-	from SupportKit import B_ERROR
+	from StorageKit import B_SAVE_PANEL,B_FILE_NODE,B_READ_ONLY
+	from SupportKit import B_ERROR,B_ENTRY_NOT_FOUND
 except:
 	print "your system lacks of Bethon modules"
 	jes = True
@@ -305,8 +298,36 @@ class HaiQRApplication(BApplication.BApplication):
 			while 1:
 				try:
 					e = msg.FindRef("refs", i)
-					bpatho= BEntry.BEntry(e,True).GetPath()
+					entryref = BEntry.BEntry(e,True)
+					#grop = BNode.BNode(entryref)
+					#gropinfo = BNodeInfo.BNodeInfo(grop)
+					#gropinfo.GetPreferredApp()
+					#print "passo o no?"
+					#print x
+					bpatho= entryref.GetPath()
 					self.txtpath= bpatho.Path()
+					###### CHECK FOR IMAGE MIME TYPE
+					static = BMimeType()
+					mime = static.GuessMimeType(self.txtpath)
+					mimetype = repr(mime.Type())
+					supertype,subtype = mimetype.split('/')
+					if (supertype.replace('\'','') == "image"):
+						if mime.IsInstalled():
+							pass #I can use the image
+						else:
+							break #I cannot use this image
+					else:
+						#"It's not an image"
+						BApplication.be_app.WindowAt(0).PostMessage(5)
+						z = BAlert('Nimg', 'This is not an image\nRetry?', 'Yes', 'No', None, 3)
+						ret = z.Go()
+						if ret == 1:
+							break # aborts adding logo
+						else:
+							# Retry: open panel
+							BApplication.be_app.WindowAt(0).PostMessage(6)
+							BApplication.be_app.WindowAt(0).PostMessage(5)
+							break
 					a=BMessage(112)
 					a.AddString("path=",self.txtpath)
 					BApplication.be_app.WindowAt(0).PostMessage(a)
