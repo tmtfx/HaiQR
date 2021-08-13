@@ -16,7 +16,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-import os,sys,struct,tempfile
+import os,sys,struct,tempfile,webbrowser,thread
 
 jes=False
 try:
@@ -67,14 +67,29 @@ try:
 except:
 	print "your python environment lacks of qrcode module"
 	jes = True
+
 try:
 	from PIL import Image
 except:
 	print "your python environment lacks of pillow module"
 	jes = True
 
-if jes:
+browserpath="/boot/system/apps/WebPositive"
+try: 
+	if os.path.exists(browserpath):
+		webbrowser.register(os.path.basename(browserpath),None,webbrowser.GenericBrowser(browserpath))#,-1)
+except:
+	print ("could not find WebPositive in "+browserpath)
 	sys.exit(1)
+
+global pothpath
+pothpath=os.path.join(sys.path[0],'data/index.html')
+
+if jes:
+	thread.start_new_thread(openlink,(pothpath,))
+	sys.exit(1)
+	
+	
 
 class PView(BView):
 	def __init__(self,frame,name,immagine):
@@ -97,7 +112,7 @@ class PView(BView):
 class HaiQRWindow(BWindow):
 	Menus = (
 		('File', ((1, 'Generate QR'),(2, 'Save QR'),(5, 'Add Logo'),(None, None),(B_QUIT_REQUESTED, 'Quit'))),
-		('Help', ((4, 'Help'),(3, 'About')))
+		('Help', ((8, 'Help'),(3, 'About')))
 		)
 		
 	def __init__(self, frame):
@@ -222,6 +237,10 @@ class HaiQRWindow(BWindow):
 		if msg.what == 112:
 			self.logopath = msg.FindString("path=")
 			return
+			
+		if msg.what == 8:
+			thread.start_new_thread(openlink,(pothpath,))
+			return
 
 		BWindow.MessageReceived(self, msg)
 		
@@ -327,7 +346,9 @@ class HaiQRApplication(BApplication.BApplication):
 			
 	def QuitRequested(self):
 		return 1
-		
+
+def openlink(link):
+	webbrowser.get(os.path.basename(browserpath)).open(link,2,False)		
 		
 def window(rectangle):
 	window = HaiQRWindow(rectangle)
