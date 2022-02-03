@@ -78,6 +78,9 @@ except:
 global pothpath
 pothpath=os.path.join(sys.path[0],'data/index.html')
 
+def openlink(link):
+	webbrowser.get(os.path.basename(browserpath)).open(link,2,False)
+
 if jes:
 	thread.start_new_thread(openlink,(pothpath,))
 	sys.exit(1)
@@ -370,10 +373,7 @@ class HaiQRApplication(BApplication.BApplication):
 			return
 			
 	def QuitRequested(self):
-		return 1
-
-def openlink(link):
-	webbrowser.get(os.path.basename(browserpath)).open(link,2,False)		
+		return 1		
 		
 def window(rectangle):
 	window = HaiQRWindow(rectangle)
