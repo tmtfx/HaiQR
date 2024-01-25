@@ -111,6 +111,7 @@ class AboutWindow(BWindow):
 				self.pbox=PView(pbox_rect,"PictureBox",img1)
 				self.box.AddChild(self.pbox,None)
 			else:
+				nopages=True
 				cwd = os.getcwd()
 				ent=BEntry(cwd+"/data/HaiQR.png")
 				if ent.Exists():
@@ -119,7 +120,20 @@ class AboutWindow(BWindow):
 					img1=BTranslationUtils.GetBitmap(perc.Path(),None)
 					self.pbox=PView(pbox_rect,"PictureBox",img1)
 					self.box.AddChild(self.pbox,None)
+					nopages=False
 				else:
+					alt="".join(sys.argv)
+					mydir=os.path.dirname(alt)
+					link=mydir+"/data/HaiQR.png"
+					ent=BEntry(link)
+					if ent.Exists():
+						#open git downloaded help bygraphiclaunch
+						ent.GetPath(perc)
+						img1=BTranslationUtils.GetBitmap(perc.Path(),None)
+						self.pbox=PView(pbox_rect,"PictureBox",img1)
+						self.box.AddChild(self.pbox,None)
+						nopages=False
+				if nopages:
 					print("no mascot found")
 		#######################################################
 		abrect=BRect(2,242, self.box.Bounds().Width()-2,self.box.Bounds().Height()-2)
@@ -301,15 +315,28 @@ class HaiQRWindow(BWindow):
 					t = Thread(target=os.system,args=(cmd,))
 					t.run()
 				else:
+					nopages=True
 					cwd = os.getcwd()
 					link=cwd+"/data/index.html"
 					ent=BEntry(link)
 					if ent.Exists():
-						#open git downloaded help
+						#open git downloaded help by cmdline
 						cmd = "open "+link
 						t = Thread(target=os.system,args=(cmd,))
 						t.run()
+						nopages=False
 					else:
+						alt="".join(sys.argv)
+						mydir=os.path.dirname(alt)
+						link=mydir+"/data/index.html"
+						ent=BEntry(link)
+						if ent.Exists():
+							#open git downloaded help bygraphiclaunch
+							cmd = "open "+link
+							t = Thread(target=os.system,args=(cmd,))
+							t.run()
+							nopages=False
+					if nopages:
 						wa=BAlert('noo', 'No help pages installed', 'Poor me', None,None,InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_WARNING_ALERT)
 						wa.Go()
 			return
