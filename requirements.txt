@@ -1,0 +1,16 @@
+HaiQR is a QR generator written in python,
+for this version it has been used python3.10.
+
+HaiQR needs qrcode python module to run, 
+use this command to install it:
+pkgman install qrcode_python310
+
+HaiQR needs pillow module,
+use this command to install it on Haiku 32 bit:
+pkgman install pillow_x86_python310
+use this command to install it on Haiku 64 bit:
+pkgman install pillow_python310
+
+HaiQR uses Haiku-PyAPI, you can retrive it via github at:
+https://github.com/coolcoder613eb/Haiku-PyAPI
+(other modules needed to compile)
