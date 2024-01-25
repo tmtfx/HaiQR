@@ -89,33 +89,35 @@ class AboutWindow(BWindow):
 		self.box = BBox(bckgnd_bounds,"Underbox",0x0202|0x0404,border_style.B_FANCY_BORDER)
 		self.bckgnd.AddChild(self.box,None)
 		################## PBOX ###############################
-		pbox_rect=BRect(0,0,self.box.Bounds().Width(),241)
+		sta=(self.box.Bounds().Width()/2)-119
+		end=(self.box.Bounds().Width()/2)+119
+		pbox_rect=BRect(sta,5,end,238)
 		perc=BPath()
 		find_directory(directory_which.B_SYSTEM_DATA_DIRECTORY,perc,False,None)
-		ent=BEntry(perc.Path()+"/HaiQR2/FeedGator1c.png")
+		ent=BEntry(perc.Path()+"/HaiQR2/HaiQR.png")
 		if ent.Exists():
 			#use mascot installed in system data folder
 			ent.GetPath(perc)
 			img1=BTranslationUtils.GetBitmap(perc.Path(),None)
-			self.pbox=PBox(pbox_rect,"PictureBox",img1)
+			self.pbox=PView(pbox_rect,"PictureBox",img1)
 			self.box.AddChild(self.pbox,None)
 		else:
 			find_directory(directory_which.B_USER_NONPACKAGED_DATA_DIRECTORY,perc,False,None)
-			ent=BEntry(perc.Path()+"/HaiQR2/Data/FeedGator1c.png")
+			ent=BEntry(perc.Path()+"/HaiQR2/data/HaiQR.png")
 			if ent.Exists():
 				#use mascot installed in user data folder
 				ent.GetPath(perc)
 				img1=BTranslationUtils.GetBitmap(perc.Path(),None)
-				self.pbox=PBox(pbox_rect,"PictureBox",img1)
+				self.pbox=PView(pbox_rect,"PictureBox",img1)
 				self.box.AddChild(self.pbox,None)
 			else:
 				cwd = os.getcwd()
-				ent=BEntry(cwd+"/Data/FeedGator1c.png")
+				ent=BEntry(cwd+"/data/HaiQR.png")
 				if ent.Exists():
 					#use mascot downloaded with git
 					ent.GetPath(perc)
 					img1=BTranslationUtils.GetBitmap(perc.Path(),None)
-					self.pbox=PBox(pbox_rect,"PictureBox",img1)
+					self.pbox=PView(pbox_rect,"PictureBox",img1)
 					self.box.AddChild(self.pbox,None)
 				else:
 					print("no mascot found")
