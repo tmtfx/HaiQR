@@ -293,7 +293,7 @@ class HaiQRWindow(BWindow):
 				t.run()
 			else:
 				find_directory(directory_which.B_USER_NONPACKAGED_DATA_DIRECTORY,perc,False,None)
-				link=perc.Path()+"/HaiQR2/Data/help/index.html"
+				link=perc.Path()+"/HaiQR2/data/index.html"
 				ent=BEntry(link)
 				if ent.Exists():
 					#open user installed help
@@ -302,7 +302,7 @@ class HaiQRWindow(BWindow):
 					t.run()
 				else:
 					cwd = os.getcwd()
-					link=cwd+"/Data/help/index.html"
+					link=cwd+"/data/index.html"
 					ent=BEntry(link)
 					if ent.Exists():
 						#open git downloaded help
