@@ -1,0 +1,6 @@
+v0.1
+Base app written in python
+it generates shows and saves QRs
+Add/Remove logo function
+Checks MimeType for logo
+Fix for SaveFilePanel bug disabling "default button"
