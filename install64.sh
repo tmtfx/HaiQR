@@ -15,7 +15,7 @@ echo "Do you wish to git clone & compile Haiku-PyAPI to your system? (type y or 
 read text
 if [ $text == "y" ]
 then
-git clone https://github.com/coolcoder613eb/Haiku-PyAPI.git
+git clone --recourse-submodules https://github.com/coolcoder613eb/Haiku-PyAPI.git
 cd Haiku-PyAPI
 jam -j$(nproc)
 ret2=$?
@@ -25,7 +25,8 @@ then
 		mkdir /boot/system/non-packaged/lib/python3.10/site-packages/Be
 	fi
 	echo "copying compiled data to system folder..."
-	cd bin/x86_64/python3.10 && cp -v * /boot/system/non-packaged/lib/python3.10/site-packages/Be
+	#cd bin/x86_64/python3.10 && cp -v * /boot/system/non-packaged/lib/python3.10/site-packages/Be
+	cd build/python3.10_release && cp -v * /boot/system/non-packaged/lib/python3.10/site-packages/Be
 	ret7=$?
 	cd ../../..
 fi
@@ -33,6 +34,7 @@ cd ..
 else
 echo "Proceeding..."
 ret2=1
+ret7=1
 fi
 echo
 if [ -e HaiQR.py ]
@@ -73,6 +75,12 @@ echo
 
 
 if [ $ret2 -lt 1 ]
+then
+	echo Compilation of Haiku-PyAPI OK
+else
+	echo Compilation of Haiku-PyAPI FAILED
+fi
+if [ $ret7 -lt 1 ]
 then
 	echo Installation of Haiku-PyAPI OK
 else
