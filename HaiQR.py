@@ -222,7 +222,7 @@ class HaiQRWindow(BWindow):
 				self.qr.clear()
 				self.qr.add_data(self.tachetest.Text())
 				self.qr.make(fit=True)
-				self.qrimg=self.qr.make_image(fill_color="black",back_color="white").convert('RGB')
+				self.qrimg=self.qr.make_image(fill_color="black",back_color="white")#.convert('RGB')
 				if self.logopath != "":
 					logo_display = Image.open(self.logopath)
 					logo_display.thumbnail((60, 60))
