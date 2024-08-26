@@ -298,7 +298,7 @@ class HaiQRWindow(BWindow):
 			#HELP
 			perc=BPath()
 			find_directory(directory_which.B_SYSTEM_DOCUMENTATION_DIRECTORY,perc,False,None)
-			link=perc.Path()+"/HaiQR2/index.html"
+			link=perc.Path()+"/packages/haiqr/HaiQR2/index.html"
 			ent=BEntry(link)
 			if ent.Exists():
 				# open system documentation help
