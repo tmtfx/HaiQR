@@ -273,54 +273,18 @@ class AboutWindow(BWindow):
 			self.pbox=PView(pbox_rect,"PictureBox",img1)
 			self.box.AddChild(self.pbox,None)
 		else:
-			print("manca immagine")
-		#perc=BPath()
-		#find_directory(directory_which.B_SYSTEM_DATA_DIRECTORY,perc,False,None)
-		#ent=BEntry(perc.Path()+"/HaiQR2/HaiQR.png")
-		#if ent.Exists():
-		#	#use mascot installed in system data folder
-		#	ent.GetPath(perc)
-		#	img1=BTranslationUtils.GetBitmap(perc.Path(),None)
-		#	self.pbox=PView(pbox_rect,"PictureBox",img1)
-		#	self.box.AddChild(self.pbox,None)
-		#else:
-		#	find_directory(directory_which.B_USER_NONPACKAGED_DATA_DIRECTORY,perc,False,None)
-		#	ent=BEntry(perc.Path()+"/HaiQR2/data/HaiQR.png")
-		#	if ent.Exists():
-		#		#use mascot installed in user data folder
-		#		ent.GetPath(perc)
-		#		img1=BTranslationUtils.GetBitmap(perc.Path(),None)
-		#		self.pbox=PView(pbox_rect,"PictureBox",img1)
-		#		self.box.AddChild(self.pbox,None)
-		#	else:
-		#		nopages=True
-		#		cwd = os.getcwd()
-		#		ent=BEntry(cwd+"/data/HaiQR.png")
-		#		if ent.Exists():
-		#			#use mascot downloaded with git
-		#			ent.GetPath(perc)
-		#			img1=BTranslationUtils.GetBitmap(perc.Path(),None)
-		#			self.pbox=PView(pbox_rect,"PictureBox",img1)
-		#			self.box.AddChild(self.pbox,None)
-		#			nopages=False
-		#		else:
-		#			alt="".join(sys.argv)
-		#			mydir=os.path.dirname(alt)
-		#			link=mydir+"/data/HaiQR.png"
-		#			ent=BEntry(link)
-		#			if ent.Exists():
-		#				#open git downloaded help bygraphiclaunch
-		#				ent.GetPath(perc)
-		#				img1=BTranslationUtils.GetBitmap(perc.Path(),None)
-		#				self.pbox=PView(pbox_rect,"PictureBox",img1)
-		#				self.box.AddChild(self.pbox,None)
-		#				nopages=False
-		#		if nopages:
-		#			print("no mascot found")
-		########################################################
+			print("manca l'immagine")
+			rec=self.box.Bounds()
+			fontina=BFont()
+			self.box.GetFont(fontina)
+			hf=fontina.Size()
+			mistxt=_("image missing")
+			sw=fontina.StringWidth(mistxt)
+			recsv=BRect(rec.Width()/2-sw/2,rec.Height()/2-hf/2-242-2,rec.Width()/2+sw/2,rec.Height()/2+hf/2-242+2)
+			self.pbox=BStringView(recsv,"picture_missing",mistxt)
+			self.box.AddChild(self.pbox,None)
 		abrect=BRect(2,242, self.box.Bounds().Width()-2,self.box.Bounds().Height()-2)
 		inner_ab=BRect(4,4,abrect.Width()-4,abrect.Height()-4)
-
 
 		self.AboutText = BTextView(abrect, 'aBOUTTxTView', inner_ab , B_FOLLOW_NONE)
 		self.AboutText.MakeEditable(False)
@@ -369,7 +333,7 @@ class AboutWindow(BWindow):
 		BWindow.WindowActivated(self, active)
 
 	def QuitRequested(self):
-		be_app.WindowAt(0).Activate() #sometimes it doesn't happen so we try to force it
+		be_app.WindowAt(0).Activate() #sometimes it doesn't happen (why?) so we try to force it
 		return BWindow.QuitRequested(self)
 
 

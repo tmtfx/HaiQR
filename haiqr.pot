@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-26 09:23+0100\n"
+"POT-Creation-Date: 2025-11-26 09:28+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,24 +18,28 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #. Translators: The app name, don't translate, only transliterate
-#: HaiQR.py:226
+#: HaiQR.py:223
 msgid "HaiQR2"
 msgstr ""
 
 #. Translators: state of release like: alpha, beta, release
-#: HaiQR.py:229
+#: HaiQR.py:226
 msgid "alpha"
 msgstr ""
 
-#: HaiQR.py:262 HaiQR.py:380
+#: HaiQR.py:259 HaiQR.py:344
 msgid "About"
 msgstr ""
 
-#: HaiQR.py:332
+#: HaiQR.py:281
+msgid "image missing"
+msgstr ""
+
+#: HaiQR.py:293
 msgid "version"
 msgstr ""
 
-#: HaiQR.py:333
+#: HaiQR.py:294
 msgid ""
 "\n"
 "\n"
@@ -46,14 +50,14 @@ msgid ""
 "\n"
 msgstr ""
 
-#: HaiQR.py:334
+#: HaiQR.py:295
 msgid ""
 " is a reworked update of HaiQR which used python2 and Bethon.\n"
 "\n"
 "This version is in "
 msgstr ""
 
-#: HaiQR.py:335
+#: HaiQR.py:296
 msgid ""
 " state\n"
 "\t\t\t\t\t\t\t\t\tdesigned by Fabio Tomat (TmTFx)\n"
@@ -61,65 +65,65 @@ msgid ""
 "\t\tpress ESC to close this window"
 msgstr ""
 
-#: HaiQR.py:377
+#: HaiQR.py:341
 msgid "Add Logo"
 msgstr ""
 
-#: HaiQR.py:379
+#: HaiQR.py:343
 msgid "File"
 msgstr ""
 
-#: HaiQR.py:379
+#: HaiQR.py:343
 msgid "Generate QR"
 msgstr ""
 
-#: HaiQR.py:379
+#: HaiQR.py:343
 msgid "Save QR"
 msgstr ""
 
-#: HaiQR.py:379
+#: HaiQR.py:343
 msgid "Quit"
 msgstr ""
 
-#: HaiQR.py:380
+#: HaiQR.py:344
 msgid "Help"
 msgstr ""
 
-#: HaiQR.py:385
+#: HaiQR.py:349
 msgid "QR generator for Haiku"
 msgstr ""
 
-#: HaiQR.py:407
+#: HaiQR.py:370
 msgid "Paste here:"
 msgstr ""
 
-#: HaiQR.py:420
+#: HaiQR.py:383
 msgid "QR it!"
 msgstr ""
 
-#: HaiQR.py:562
+#: HaiQR.py:525
 msgid "No help pages installed"
 msgstr ""
 
-#: HaiQR.py:562
+#: HaiQR.py:525
 msgid "Poor me"
 msgstr ""
 
-#: HaiQR.py:610
+#: HaiQR.py:573
 msgid ""
 "I cannot use this image\n"
 "Select another one?"
 msgstr ""
 
-#: HaiQR.py:610 HaiQR.py:622
+#: HaiQR.py:573 HaiQR.py:585
 msgid "Yes"
 msgstr ""
 
-#: HaiQR.py:610 HaiQR.py:622
+#: HaiQR.py:573 HaiQR.py:585
 msgid "No"
 msgstr ""
 
-#: HaiQR.py:622
+#: HaiQR.py:585
 msgid ""
 "This is not an image\n"
 "Retry?"
