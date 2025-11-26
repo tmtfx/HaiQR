@@ -1,7 +1,7 @@
 #!/boot/system/bin/python3
 jes=False
 try:
-	from Be import BApplication, BWindow, BBox, BRect, BTextControl, BView, BMenu, BMenuBar, BMenuItem, BSeparatorItem, AppDefs, BFont
+	from Be import BApplication, BWindow, BBox, BRect, BTextControl, BView, BMenu, BMenuBar, BMenuItem, BSeparatorItem, AppDefs, BFont, BDirectory, BFile
 	from Be import BMessage, BBitmap, BTextView, BButton, BStringItem, window_type, B_NOT_RESIZABLE, B_QUIT_ON_WINDOW_CLOSE, B_CLOSE_ON_ESCAPE
 	from Be import BStringView, BMimeType, BPoint, BAlert,BPath,InterfaceDefs,BScreen
 	from Be.View import *
@@ -10,10 +10,11 @@ try:
 	from Be.Alert import alert_type
 	from Be.AppDefs import *
 	from Be.View import *#B_WILL_DRAW,B_FOLLOW_NONE,B_FOLLOW_ALL_SIDES,B_FOLLOW_ALL,B_NAVIGABLE,B_FOLLOW_LEFT,B_FOLLOW_BOTTOM,B_FOLLOW_LEFT_RIGHT,B_FOLLOW_RIGHT,B_FULL_UPDATE_ON_RESIZE
+	from Be.TextView import text_run
 	from Be.FilePanel import *
 	from Be.Font import be_plain_font, be_bold_font
 	from Be.InterfaceDefs import border_style
-
+	from Be.TypeConstants import *
 	from Be import BEntry,BUrl,BTranslationUtils
 	from Be.Entry import entry_ref
 	from Be.Entry import get_ref_for_path
@@ -21,9 +22,9 @@ except:
 	print("error loading Haiku-PyAPI modules")
 	jes = True
 
-import tempfile, os, sys, struct
+import tempfile, os, sys, struct, locale, gettext
 from threading import Thread
-
+from random import randrange
 try:
 	import qrcode
 except:
@@ -38,17 +39,191 @@ except:
 
 
 
+def Ent_config():
+	perc=BPath()
+	find_directory(directory_which.B_USER_NONPACKAGED_DATA_DIRECTORY,perc,False,None)
+	datapath=BDirectory(perc.Path()+"/HaiQR2")
+	ent=BEntry(datapath,perc.Path()+"/HaiQR2")
+	if not ent.Exists():
+		datapath.CreateDirectory(perc.Path()+"/HaiQR2", datapath)
+	ent.GetPath(perc)
+	confile=BPath(perc.Path()+'/settings',None,False)
+	ent=BEntry(confile.Path())
+	return(ent,confile.Path())
+
 def openlink(link):
 	osd=BUrl(link)
 	retu=osd.OpenWithPreferredApplication()
 
+def lookfdata(name):
+	perc=BPath()
+	find_directory(directory_which.B_SYSTEM_DATA_DIRECTORY,perc,False,None)
+	ent=BEntry(perc.Path()+"/HaiQR2/"+name)
+	if ent.Exists():
+		#use mascot installed in system data folder
+		ent.GetPath(perc)
+		return (True,perc.Path())
+	else:
+		find_directory(directory_which.B_USER_NONPACKAGED_DATA_DIRECTORY,perc,False,None)
+		ent=BEntry(perc.Path()+"/HaiQR2/"+name)
+		if ent.Exists():
+			#use mascot installed in user data folder
+			ent.GetPath(perc)
+			return (True,perc.Path())
+		else:
+			nopages=True
+			cwd = os.getcwd()
+			ent=BEntry(cwd+"/data/"+name)
+			if ent.Exists():
+				#use mascot downloaded with git by cmdline
+				ent.GetPath(perc)
+				return (True,perc.Path())
+				nopages=False
+			else:
+				alt="".join(sys.argv)
+				mydir=os.path.dirname(alt)
+				link=mydir+"/data/"+name
+				ent=BEntry(link)
+				if ent.Exists():
+					ent.GetPath(perc)
+					return (True,perc.Path())
+					nopages=False
+			if nopages:
+				return (False,None)
+
+class LocalizItem(BMenuItem):
+	def __init__(self,name):
+		self.name=name
+		msg=BMessage(600)
+		msg.AddString("name",self.name)
+		BMenuItem.__init__(self,self.name,msg,'\x00',0)
+
+locale_dir=None
+b,p=lookfdata("locale")
+lt=[]
+lista_traduzioni=[]
+if b:
+	if BEntry(p).IsDirectory():
+		locale_dir=p
+		#creare lista di traduzioni disponibili
+		dir=BDirectory(p)
+		ent=BEntry()
+		dir.Rewind()
+		ret = False
+		while not ret:
+			ret=dir.GetNextEntry(ent,True)
+			if not ret:
+				perc=BPath()
+				ent.GetPath(perc)
+				lt.append(perc.Leaf())
+				lista_traduzioni.append(LocalizItem(perc.Leaf()))
+	else:
+		#p era un file
+		locale_dir=None
+		t = gettext.NullTranslations()
+
 ########### TODO INTEGRARE PERCORSI DI INSTALLAZIONE
-pothpath=os.path.join(sys.path[0],'data/index.html')
-if os.path.exists(pothpath):
+b,p=lookfdata("index.html")
+if b:
 	if jes:
-		t = Thread(target=openlink,args=(pothpath,))
-		t.run()
+		j = Thread(target=openlink,args=(p,))
+		j.run()
+#pothpath=os.path.join(sys.path[0],'data/index.html')
+#if os.path.exists(pothpath):
+#	if jes:
+#		t = Thread(target=openlink,args=(pothpath,))
+#		t.run()
 ############################################################################
+
+def save_config(path, config_data):
+	message = BMessage(0)
+	try:
+		for i in config_data:
+			if isinstance(config_data[i][1],str):
+				message.AddString(i, config_data[i])
+			elif isinstance(config_data[i][1],int):
+				message.AddInt32(i, config_data[i])
+			elif isinstance(config_data[i][1],bool):
+				message.AddBool(i, config_data[i])
+		ent,path=Ent_config()
+		file = BFile(path, B_WRITE_ONLY)
+		message.Flatten(file)
+		return True
+	except Exception as e:
+		print(f"Errore durante l'aggiunta o la scrittura dei dati: {e}")
+		return False
+
+def load_config(path):
+	message = BMessage()
+	config_data = {}
+	try:
+		message.Unflatten(path)
+		n=message.CountNames(B_ANY_TYPE) #B_STRING_TYPE o altri
+		ris=[]
+		typ=""
+		cont=0
+		message.GetInfo(B_STRING_TYPE,n,ris,typ,cont)
+		message.GetInfo(B_INT_TYPE,n,ris,typ,cont)
+		#RICOSTRUISCI CONFIG_DATA
+		
+		return config_data
+	except Exception as e:
+		# Se il file non esiste o è corrotto, restituisce i dati predefiniti o vuoti
+		print(f"Errore durante il caricamento del file di configurazione: {e}")
+		return None # Indica un fallimento nel caricamento
+
+ent,path=Ent_config()
+if ent.Exists():
+	cd=load_config(path)
+	if cd != None:
+		loc=cd["localization"]
+	else:
+		loc=locale.getlocale()
+else:
+	loc=locale.getlocale()
+if locale_dir!=None:
+	if loc[0] in lt:
+		try:
+			t = gettext.translation(
+				domain="haiqr",  # nome del progetto
+				localedir=locale_dir,
+				languages=[loc[0]],
+				fallback=True  # se la lingua non esiste usa inglese
+			)
+		except Exception as e:
+			print(f"Error loading translations: {e}")
+			t = gettext.NullTranslations()
+	else:
+		print("nessuna traduzione presente")
+		t = gettext.NullTranslations()
+			
+global _
+_ = t.gettext
+
+def byte_count(stringa, encoding='utf-8'):
+		byte_counts = []
+		start = 0
+		total = 0
+		for char in stringa:
+			end = start + len(char.encode(encoding))
+			total+=(end- start)
+			byte_counts.append((char,end - start))
+			start = end
+		return (total,byte_counts)
+
+def find_byte(lookf,looka,offset=0):
+	#note offset is not byte-offset but char-offset
+	retc=looka.find(lookf,offset)
+	if retc>-1:
+		trunc=looka[:retc]
+		return byte_count(trunc)[0]
+	else:
+		return -1
+# Translators: The app name, don't translate, only transliterate
+appname=_("HaiQR2")
+version="2.1"
+# Translators: state of release like: alpha, beta, release
+state=_("alpha")
 
 class PView(BView):
 	def __init__(self,frame,name,immagine):
@@ -81,7 +256,7 @@ class AboutWindow(BWindow):
 		scrfrm=scr.Frame()
 		x=(scrfrm.right+1)/2-550/2
 		y=(scrfrm.bottom+1)/2-625/2
-		BWindow.__init__(self, BRect(x, y, x+550, y+625),"About",window_type.B_MODAL_WINDOW, B_NOT_RESIZABLE|B_CLOSE_ON_ESCAPE)
+		BWindow.__init__(self, BRect(x, y, x+550, y+625),_("About"),window_type.B_MODAL_WINDOW, B_NOT_RESIZABLE|B_CLOSE_ON_ESCAPE)
 		self.bckgnd = BView(self.Bounds(), "backgroundView", 8, 20000000)
 		self.bckgnd.SetResizingMode(B_FOLLOW_V_CENTER|B_FOLLOW_H_CENTER)
 		bckgnd_bounds=self.bckgnd.Bounds()
@@ -92,79 +267,124 @@ class AboutWindow(BWindow):
 		sta=(self.box.Bounds().Width()/2)-119
 		end=(self.box.Bounds().Width()/2)+119
 		pbox_rect=BRect(sta,5,end,238)
-		perc=BPath()
-		find_directory(directory_which.B_SYSTEM_DATA_DIRECTORY,perc,False,None)
-		ent=BEntry(perc.Path()+"/HaiQR2/HaiQR.png")
-		if ent.Exists():
-			#use mascot installed in system data folder
-			ent.GetPath(perc)
-			img1=BTranslationUtils.GetBitmap(perc.Path(),None)
+		b,p=lookfdata("HaiQR.png")
+		if b:
+			img1=BTranslationUtils.GetBitmap(p,None)
 			self.pbox=PView(pbox_rect,"PictureBox",img1)
 			self.box.AddChild(self.pbox,None)
 		else:
-			find_directory(directory_which.B_USER_NONPACKAGED_DATA_DIRECTORY,perc,False,None)
-			ent=BEntry(perc.Path()+"/HaiQR2/data/HaiQR.png")
-			if ent.Exists():
-				#use mascot installed in user data folder
-				ent.GetPath(perc)
-				img1=BTranslationUtils.GetBitmap(perc.Path(),None)
-				self.pbox=PView(pbox_rect,"PictureBox",img1)
-				self.box.AddChild(self.pbox,None)
-			else:
-				nopages=True
-				cwd = os.getcwd()
-				ent=BEntry(cwd+"/data/HaiQR.png")
-				if ent.Exists():
-					#use mascot downloaded with git
-					ent.GetPath(perc)
-					img1=BTranslationUtils.GetBitmap(perc.Path(),None)
-					self.pbox=PView(pbox_rect,"PictureBox",img1)
-					self.box.AddChild(self.pbox,None)
-					nopages=False
-				else:
-					alt="".join(sys.argv)
-					mydir=os.path.dirname(alt)
-					link=mydir+"/data/HaiQR.png"
-					ent=BEntry(link)
-					if ent.Exists():
-						#open git downloaded help bygraphiclaunch
-						ent.GetPath(perc)
-						img1=BTranslationUtils.GetBitmap(perc.Path(),None)
-						self.pbox=PView(pbox_rect,"PictureBox",img1)
-						self.box.AddChild(self.pbox,None)
-						nopages=False
-				if nopages:
-					print("no mascot found")
-		#######################################################
+			print("manca immagine")
+		#perc=BPath()
+		#find_directory(directory_which.B_SYSTEM_DATA_DIRECTORY,perc,False,None)
+		#ent=BEntry(perc.Path()+"/HaiQR2/HaiQR.png")
+		#if ent.Exists():
+		#	#use mascot installed in system data folder
+		#	ent.GetPath(perc)
+		#	img1=BTranslationUtils.GetBitmap(perc.Path(),None)
+		#	self.pbox=PView(pbox_rect,"PictureBox",img1)
+		#	self.box.AddChild(self.pbox,None)
+		#else:
+		#	find_directory(directory_which.B_USER_NONPACKAGED_DATA_DIRECTORY,perc,False,None)
+		#	ent=BEntry(perc.Path()+"/HaiQR2/data/HaiQR.png")
+		#	if ent.Exists():
+		#		#use mascot installed in user data folder
+		#		ent.GetPath(perc)
+		#		img1=BTranslationUtils.GetBitmap(perc.Path(),None)
+		#		self.pbox=PView(pbox_rect,"PictureBox",img1)
+		#		self.box.AddChild(self.pbox,None)
+		#	else:
+		#		nopages=True
+		#		cwd = os.getcwd()
+		#		ent=BEntry(cwd+"/data/HaiQR.png")
+		#		if ent.Exists():
+		#			#use mascot downloaded with git
+		#			ent.GetPath(perc)
+		#			img1=BTranslationUtils.GetBitmap(perc.Path(),None)
+		#			self.pbox=PView(pbox_rect,"PictureBox",img1)
+		#			self.box.AddChild(self.pbox,None)
+		#			nopages=False
+		#		else:
+		#			alt="".join(sys.argv)
+		#			mydir=os.path.dirname(alt)
+		#			link=mydir+"/data/HaiQR.png"
+		#			ent=BEntry(link)
+		#			if ent.Exists():
+		#				#open git downloaded help bygraphiclaunch
+		#				ent.GetPath(perc)
+		#				img1=BTranslationUtils.GetBitmap(perc.Path(),None)
+		#				self.pbox=PView(pbox_rect,"PictureBox",img1)
+		#				self.box.AddChild(self.pbox,None)
+		#				nopages=False
+		#		if nopages:
+		#			print("no mascot found")
+		########################################################
 		abrect=BRect(2,242, self.box.Bounds().Width()-2,self.box.Bounds().Height()-2)
 		inner_ab=BRect(4,4,abrect.Width()-4,abrect.Height()-4)
-		mycolor=rgb_color()
-		mycolor.red=0
-		mycolor.green=200
-		mycolor.blue=0
-		mycolor.alpha=0
+
+
 		self.AboutText = BTextView(abrect, 'aBOUTTxTView', inner_ab , B_FOLLOW_NONE)
 		self.AboutText.MakeEditable(False)
 		self.AboutText.MakeSelectable(False)
 		self.AboutText.SetStylable(True)
-		stuff="\nHaiQR2 v2.0\t-\tA simple QR generator for Haiku\n\nThis is a simple QR generator written in Python 3.10 + Haiku-PyAPI and qrcode module\n\nHaiQR2 is a reworked update of HaiQR which used python2 and Bethon.\n\nThis is a beta version, due to ongoing refinements done to Haiku-PyAPI\n\t\t\t\t\t\t\t\t\tdesigned by TmTFx\n\n\t\tpress ESC to close this window"
-		self.AboutText.SetFontAndColor(be_bold_font,B_FONT_ALL,mycolor)
-		self.AboutText.SetText(stuff,None)
+		ts1=_("version")#\t-\t
+		ts2=_("\n\nA simple QR generator for Haiku.\n\nThis is a simple QR generator written in Python 3.10 + Haiku-PyAPI and qrcode module\n\n")
+		ts3=_(" is a reworked update of HaiQR which used python2 and Bethon.\n\nThis version is in ")
+		ts4=_(" state\n\t\t\t\t\t\t\t\t\tdesigned by Fabio Tomat (TmTFx)\n\n\t\tpress ESC to close this window")
+		stuff=" ".join((appname,ts1,version,ts2,appname,ts3,state,ts4))
+		arra=[]
+		i = len(appname)
+		c=0
+		fon1=BFont(be_bold_font)
+		fon1.SetSize(48.0)
+		while c<i:
+			arra.append(text_run())
+			arra[-1].offset=c
+			arra[-1].font=fon1
+			col=rgb_color()
+			col.red=0
+			col.green=0
+			col.blue=randrange(50,200)
+			col.alpha=200
+			arra[-1].color=col
+			c+=1
+		n=find_byte("version",stuff)
+		txtrun2=text_run()
+		txtrun2.offset=n
+		txtrun2.font=be_plain_font
+		col2=rgb_color()
+		col2.red=0
+		col2.green=0
+		col2.blue=0
+		col2.alpha=0
+		txtrun2.color=col2
+		arra.append(txtrun2)
+		self.AboutText.SetText(stuff,arra)
 		self.box.AddChild(self.AboutText,None)
+
+	def WindowActivated(self, active):
+		if active:
+			self.AboutText.Invalidate()
+			self.box.Invalidate()
+			self.pbox.Invalidate()
+		BWindow.WindowActivated(self, active)
+
+	def QuitRequested(self):
+		be_app.WindowAt(0).Activate() #sometimes it doesn't happen so we try to force it
+		return BWindow.QuitRequested(self)
 
 
 class HaiQRWindow(BWindow):
+	addlogo=_("Add Logo")
 	Menus = (
-		('File', ((1, 'Generate QR'),(2, 'Save QR'),(5, 'Add Logo'),(None, None),(AppDefs.B_QUIT_REQUESTED, 'Quit'))),
-		('Help', ((8, 'Help'),(3, 'About')))
+		(_('File'), ((1, _('Generate QR')),(2, _('Save QR')),(5, addlogo),(None, None),(AppDefs.B_QUIT_REQUESTED, _('Quit')))),
+		(_('Help'), ((8, _('Help')),(3, _('About'))))
 		)
 		
 	def __init__(self, frame):
 		selectionmenu=0
-		BWindow.__init__(self, frame, 'QR generator for Haiku', window_type.B_TITLED_WINDOW,B_QUIT_ON_WINDOW_CLOSE)#|B_CLOSE_ON_ESCAPE)
+		BWindow.__init__(self, frame, _('QR generator for Haiku'), window_type.B_TITLED_WINDOW,B_QUIT_ON_WINDOW_CLOSE)#|B_CLOSE_ON_ESCAPE)
 		bounds = self.Bounds()
-		self.bckgnd = BView(bounds, "background",8, 20000000)#B_FOLLOW_NONE,1048576)# B_FOLLOW_ALL_SIDES, 2000000|8000000) less than this value 1048576 you get white background
-		#self.bckgnd.SetResizingMode(B_FOLLOW_ALL_SIDES)
+		self.bckgnd = BView(bounds, "background",8, 20000000)
 		self.bar = BMenuBar(self.bckgnd.Bounds(), 'Bar')
 		x, barheight = self.bar.GetPreferredSize()
 		for menu, items in self.Menus:
@@ -183,19 +403,20 @@ class HaiQRWindow(BWindow):
 		#self.underlist.SetResizingMode(B_FOLLOW_ALL_SIDES)
 		self.bckgnd.AddChild(self.underlist,None)
 		a=BFont()
-		wid=a.StringWidth("Paste here:")
+		labello=_("Paste here:")
+		wid=a.StringWidth(labello)
 		whereplace=BRect(30,underbounds.Height()-barheight-30,30+wid,underbounds.Height()-barheight-10)
-		self.Hintlabel= BStringView(whereplace,"Label","Paste here:")
+		self.Hintlabel= BStringView(whereplace,"Label",labello)
 		##### this is a workaround####
 		self.underlist.AddChild(self.Hintlabel,None)
 		self.Hintlabel.Hide()
 		######## end of workaround ##########################
-		self.tachetest=BTextControl(BRect(7,underbounds.Height()-barheight-27,underbounds.Width()-57,underbounds.Height()-barheight-17),'TxTView', 'Paste here:',None,BMessage(1),B_FOLLOW_LEFT_RIGHT | B_FOLLOW_BOTTOM)
+		self.tachetest=BTextControl(BRect(7,underbounds.Height()-barheight-27,underbounds.Width()-57,underbounds.Height()-barheight-17),'TxTView', labello,None,BMessage(1),B_FOLLOW_LEFT_RIGHT | B_FOLLOW_BOTTOM)
 		self.tachetest.SetDivider(wid+5)
 		self.underlist.AddChild(self.tachetest,None)
 		self.tachetest.MakeFocus(1)
 		#self.BUTTON_MSG = struct.unpack('!l', 'PRES')[0]
-		self.QRButton = BButton(BRect(underbounds.Width()-53, underbounds.Height()-barheight-32, underbounds.Width()-5, underbounds.Height()-barheight-10), "QRit", "QR it!", BMessage(1), B_FOLLOW_RIGHT | B_FOLLOW_BOTTOM)
+		self.QRButton = BButton(BRect(underbounds.Width()-53, underbounds.Height()-barheight-32, underbounds.Width()-5, underbounds.Height()-barheight-10), "QRit", _("QR it!"), BMessage(1), B_FOLLOW_RIGHT | B_FOLLOW_BOTTOM)
 		self.underlist.AddChild(self.QRButton, None)
 		self.qr = qrcode.QRCode(version=1,error_correction=qrcode.constants.ERROR_CORRECT_H,box_size=10,border=4)
 		###### PLACE FOR GENERATED QRs
@@ -271,17 +492,17 @@ class HaiQRWindow(BWindow):
 		if msg.what == 5:
 			if not(self.ofp.IsShowing()):
 			#ADD OR REMOVE LOGO
-				if self.bar.FindItem("Add Logo").IsMarked():
+				if self.bar.FindItem(self.addlogo).IsMarked():
 					#remove logo
 					self.logopath=""
-					self.bar.FindItem("Add Logo").SetMarked(0)
+					self.bar.FindItem(self.addlogo).SetMarked(0)
 					be_app.PostMessage(BMessage(311))
 					if self.qrcreated:
 						be_app.WindowAt(0).PostMessage(BMessage(1))
 				else:
 					if self.CanOpenPanel:
 						#add logo
-						self.bar.FindItem("Add Logo").SetMarked(1)
+						self.bar.FindItem(self.addlogo).SetMarked(1)
 						self.ofp.Show()
 						self.CanOpenPanel=False
 			return
@@ -337,7 +558,7 @@ class HaiQRWindow(BWindow):
 							t.run()
 							nopages=False
 					if nopages:
-						wa=BAlert('noo', 'No help pages installed', 'Poor me', None,None,InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_WARNING_ALERT)
+						wa=BAlert('noo', _('No help pages installed'), _('Poor me'), None,None,InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_WARNING_ALERT)
 						wa.Go()
 			return
 
@@ -385,7 +606,7 @@ class App(BApplication):
                             pass #I can use the image
                         else:
                             #I cannot use this image
-                            z = BAlert('Nimg', 'I cannot use this image\nSelect another one?', 'Yes', 'No', None, InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_WARNING_ALERT)
+                            z = BAlert('Nimg', _('I cannot use this image\nSelect another one?'), _('Yes'), _('No'), None, InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_WARNING_ALERT)
                             ret = z.Go()
                             if ret == 1:
                                 break # aborts adding logo
@@ -397,7 +618,7 @@ class App(BApplication):
                     else:
                         #"It's not an image"
                         be_app.WindowAt(0).PostMessage(5)
-                        z = BAlert('Nimg', 'This is not an image\nRetry?', 'Yes', 'No', None, InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_WARNING_ALERT)
+                        z = BAlert('Nimg', _('This is not an image\nRetry?'), _('Yes'), _('No'), None, InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_WARNING_ALERT)
                         ret = z.Go()
                         if ret == 1:
                             break # aborts adding logo
