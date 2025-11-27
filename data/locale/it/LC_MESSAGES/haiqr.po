@@ -1,44 +1,45 @@
-# Italian translations for PACKAGE package
-# Traduzioni italiane per il pacchetto PACKAGE..
-# Copyright (C) 2025 THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# Yourself <your_email@example.com>, 2025.
+# Italian translations for HaiQR package
+# Traduzioni italiane per il pacchetto HaiQR.
+# Copyright (C) 2025 THE HAIQR'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the HaiQR package.
+# Fabio Tomat <f.t.public@gmail.com>, 2025.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: haiqr-2.1.a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-11-26 09:28+0100\n"
-"PO-Revision-Date: 2025-11-26 10:58+0100\n"
-"Last-Translator: Yourself <your_email@example.com>\n"
-"Language-Team: Italian <tp@lists.linux.it>\n"
+"PO-Revision-Date: 2025-11-27 20:12+0000\n"
+"Last-Translator: Fabio Tomat <f.t.public@gmail.com>\n"
+"Language-Team: Italian <f.t.public@gmail.com>\n"
 "Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Editor: HaiPO 2.5 beta\n"
 
 #. Translators: The app name, don't translate, only transliterate
 #: HaiQR.py:223
 msgid "HaiQR2"
-msgstr ""
+msgstr "HaiQR2"
 
 #. Translators: state of release like: alpha, beta, release
 #: HaiQR.py:226
 msgid "alpha"
-msgstr ""
+msgstr "alpha"
 
 #: HaiQR.py:259 HaiQR.py:344
 msgid "About"
-msgstr ""
+msgstr "Informazioni"
 
 #: HaiQR.py:281
 msgid "image missing"
-msgstr ""
+msgstr "manca l'immagine"
 
 #: HaiQR.py:293
 msgid "version"
-msgstr ""
+msgstr "versione"
 
 #: HaiQR.py:294
 msgid ""
@@ -46,10 +47,15 @@ msgid ""
 "\n"
 "A simple QR generator for Haiku.\n"
 "\n"
-"This is a simple QR generator written in Python 3.10 + Haiku-PyAPI and "
-"qrcode module\n"
+"This is a simple QR generator written in Python 3.10 + Haiku-PyAPI and qrcode module\n"
 "\n"
 msgstr ""
+"\n"
+"\n"
+"Un semplice generatore di QR per Haiku.\n"
+"\n"
+"Questa applicazione è un semplice generatore di codici QR scritto in Python 3.10 + Haiku-PyAPI con l'ausilio del modulo  qrcode\n"
+"\n"
 
 #: HaiQR.py:295
 msgid ""
@@ -57,6 +63,9 @@ msgid ""
 "\n"
 "This version is in "
 msgstr ""
+" è un aggiornamento rivisitato di HaiQR, il quale utilizzava python2 e Bethon.\n"
+"\n"
+"Questa versione è in stato "
 
 #: HaiQR.py:296
 msgid ""
@@ -65,67 +74,75 @@ msgid ""
 "\n"
 "\t\tpress ESC to close this window"
 msgstr ""
+" \n"
+"\t\t\t\t\t\t\t\t\tprogettata da Fabio Tomat (TmTFx)\n"
+"\n"
+"\t\tpremi ESC per chiudere questa finestra"
 
 #: HaiQR.py:341
 msgid "Add Logo"
-msgstr ""
+msgstr "Aggiungi Logo"
 
 #: HaiQR.py:343
 msgid "File"
-msgstr ""
+msgstr "File"
 
 #: HaiQR.py:343
 msgid "Generate QR"
-msgstr ""
+msgstr "Genera QR"
 
 #: HaiQR.py:343
 msgid "Save QR"
-msgstr ""
+msgstr "Salva QR"
 
 #: HaiQR.py:343
 msgid "Quit"
-msgstr ""
+msgstr "Esci"
 
 #: HaiQR.py:344
 msgid "Help"
-msgstr ""
+msgstr "Aiuto"
 
 #: HaiQR.py:349
 msgid "QR generator for Haiku"
-msgstr ""
+msgstr "Generatore di QR per Haiku"
 
 #: HaiQR.py:370
 msgid "Paste here:"
-msgstr ""
+msgstr "Incolla qui:"
 
 #: HaiQR.py:383
 msgid "QR it!"
-msgstr ""
+msgstr "Crea"
 
 #: HaiQR.py:525
 msgid "No help pages installed"
-msgstr ""
+msgstr "Nessuna guida installata"
 
 #: HaiQR.py:525
 msgid "Poor me"
-msgstr ""
+msgstr "Povero me"
 
 #: HaiQR.py:573
 msgid ""
 "I cannot use this image\n"
 "Select another one?"
 msgstr ""
+"Non posso utilizzare questa immagine\n"
+"Selezionare un'altra?"
 
 #: HaiQR.py:573 HaiQR.py:585
 msgid "Yes"
-msgstr ""
+msgstr "Sì"
 
 #: HaiQR.py:573 HaiQR.py:585
 msgid "No"
-msgstr ""
+msgstr "No"
 
 #: HaiQR.py:585
 msgid ""
 "This is not an image\n"
 "Retry?"
 msgstr ""
+"Questa non è una immagine\n"
+"Riprovare?"
