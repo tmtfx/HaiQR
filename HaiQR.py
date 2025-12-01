@@ -20,6 +20,7 @@ try:
 	from Be.Entry import get_ref_for_path
 	from Be.Errors import B_OK
 	from Be.Accelerant import display_mode
+	from Be.StorageDefs import B_READ_WRITE,B_WRITE_ONLY,B_READ_ONLY
 except:
 	print("error loading Haiku-PyAPI modules")
 	jes = True
@@ -138,20 +139,23 @@ def save_config(config_data):
 					message.AddInt32(config['nome'], config['valore'])
 				elif config['tipo'] == B_BOOL_TYPE:
 					message.AddBool(config['nome'], config['valore'])
-				#for i in config:
-				#	if isinstance(config[i][1],str):
-				#		message.AddString(i, config[i])
-				#	elif isinstance(config[i][1],int):
-				#		message.AddInt32(i, config[i])
-				#	elif isinstance(config[i][1],bool):
-				#		message.AddBool(i, config[i])
-				#ent,path=Ent_config()
-				jj,ll=lookfdata(".")
-				dir=BDirectory(ll)
-				file=BFile()
-				ret=dir.CreateFile(ll+"/settings.cfg",file)
+				#jj,ll=lookfdata(".")
+				ent,path=Ent_config()
+				if ent.Exists():
+					print("assegno lettura a file di configurazione")
+					file=BFile(path,B_READ_WRITE)
+				else:
+					print("creo file di configurazione")
+					dir=BDirectory()
+					ent.GetParent(dir)
+					file=BFile()
+					ret=dir.CreateFile(path,file)
+				#dir=BDirectory(ll)
+				#file=BFile()
+				#ret=dir.CreateFile(ll+"/settings.cfg",file)
 				message.Flatten(file)
 				file.Unset()
+				#del file
 				return True
 		except Exception as e:
 			print(f"Errore durante l'aggiunta o la scrittura dei dati: {e}")
@@ -166,9 +170,7 @@ def load_config(path):
 	configuration_data = []
 	try:
 		message.Unflatten(BFile(path,0))
-		#message.PrintToStream()
 		ntot=message.CountNames(B_ANY_TYPE)
-		#print(f"ci sono {ntot} elementi")
 		i=0
 		while i<ntot:
 			typ=B_ANY_TYPE
@@ -205,7 +207,7 @@ if not jk:
 
 ent,path=Ent_config()
 if ent.Exists():
-	cd=load_config(path)		
+	cd=load_config(path)
 	if cd != None:
 		found=False
 		for itm in cd:
@@ -347,7 +349,7 @@ class CustomLang(BWindow):
 			be_app.WindowAt(0).PostMessage(msg)
 			self.Quit()
 			return
-		BWindow.MessageReceived(self,msg)
+		return BWindow.MessageReceived(self,msg)
 
 
 
@@ -636,7 +638,16 @@ class HaiQRWindow(BWindow):
 			self.tachetest.SetText(txxt)
 		elif msg.what==600:
 			lang=msg.FindString("name")
-			print(lang)
+			ent,path=Ent_config()
+			if ent.Exists():
+				cd=load_config(path)
+				for i in cd:
+					if i['nome'] == "localization":
+						i["valore"]=lang
+						save_config(cd)
+						break
+			return
+			#print(lang)
 			#TODO: salvare in settings.cfg
 
 		BWindow.MessageReceived(self, msg)
