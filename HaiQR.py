@@ -103,7 +103,6 @@ class LocalizItem(BMenuItem):
 locale_dir=None
 b,p=lookfdata("locale")
 lt=[]
-#lista_traduzioni=[]
 if b:
 	if BEntry(p).IsDirectory():
 		locale_dir=p
@@ -144,7 +143,6 @@ def save_config(config_data):
 				if ent.Exists():
 					file=BFile(path,B_READ_WRITE)
 				else:
-					print("creo file di configurazione")
 					dir=BDirectory()
 					ent.GetParent(dir)
 					file=BFile()
@@ -234,7 +232,6 @@ if locale_dir!=None:
 			print(f"Error loading translations: {e}")
 			t = gettext.NullTranslations()
 	else:
-		print("nessuna traduzione presente")
 		t = gettext.NullTranslations()
 else:
 	t = gettext.NullTranslations()
@@ -324,7 +321,7 @@ class CustomLang(BWindow):
 		h=a.virtual_height
 		fon=BFont()
 		# Translators: window title
-		BWindow.__init__(self, BRect(w/2-200, h/2-fon.Size()-10, w/2+200, h/2+(fon.Size()*2.5)),_("CustomLang"),window_type.B_BORDERED_WINDOW, B_NOT_RESIZABLE|B_CLOSE_ON_ESCAPE)
+		BWindow.__init__(self, BRect(w/2-200, h/2-fon.Size()-10, w/2+200, h/2+(fon.Size()*2.5)),"CustomLang",window_type.B_BORDERED_WINDOW, B_NOT_RESIZABLE|B_CLOSE_ON_ESCAPE)
 		self.bckgnd=BBox(self.Bounds(),"bckgnd_customlang",B_FOLLOW_NONE,B_WILL_DRAW,border_style.B_NO_BORDER)
 		
 		self.AddChild(self.bckgnd,None)
