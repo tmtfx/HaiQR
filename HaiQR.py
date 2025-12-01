@@ -18,6 +18,7 @@ try:
 	from Be import BEntry,BUrl,BTranslationUtils
 	from Be.Entry import entry_ref
 	from Be.Entry import get_ref_for_path
+	from Be.Errors import B_OK
 except:
 	print("error loading Haiku-PyAPI modules")
 	jes = True
@@ -47,7 +48,7 @@ def Ent_config():
 	if not ent.Exists():
 		datapath.CreateDirectory(perc.Path()+"/HaiQR2", datapath)
 	ent.GetPath(perc)
-	confile=BPath(perc.Path()+'/settings',None,False)
+	confile=BPath(perc.Path()+'/settings.cfg',None,False)
 	ent=BEntry(confile.Path())
 	return(ent,confile.Path())
 
@@ -90,7 +91,6 @@ def lookfdata(name):
 					nopages=False
 			if nopages:
 				return (False,None)
-
 class LocalizItem(BMenuItem):
 	def __init__(self,name):
 		self.name=name
@@ -101,7 +101,7 @@ class LocalizItem(BMenuItem):
 locale_dir=None
 b,p=lookfdata("locale")
 lt=[]
-lista_traduzioni=[]
+#lista_traduzioni=[]
 if b:
 	if BEntry(p).IsDirectory():
 		locale_dir=p
@@ -116,11 +116,6 @@ if b:
 				perc=BPath()
 				ent.GetPath(perc)
 				lt.append(perc.Leaf())
-				lista_traduzioni.append(LocalizItem(perc.Leaf()))
-	else:
-		#p era un file
-		locale_dir=None
-		t = gettext.NullTranslations()
 
 ########### TODO INTEGRARE PERCORSI DI INSTALLAZIONE
 b,p=lookfdata("index.html")
@@ -128,59 +123,108 @@ if b:
 	if jes:
 		j = Thread(target=openlink,args=(p,))
 		j.run()
-#pothpath=os.path.join(sys.path[0],'data/index.html')
-#if os.path.exists(pothpath):
-#	if jes:
-#		t = Thread(target=openlink,args=(pothpath,))
-#		t.run()
 ############################################################################
 
-def save_config(path, config_data):
-	message = BMessage(0)
-	try:
-		for i in config_data:
-			if isinstance(config_data[i][1],str):
-				message.AddString(i, config_data[i])
-			elif isinstance(config_data[i][1],int):
-				message.AddInt32(i, config_data[i])
-			elif isinstance(config_data[i][1],bool):
-				message.AddBool(i, config_data[i])
+def save_config(config_data):
+	if isinstance(config_data,list):
+		message = BMessage(0)
+		try:
+			ordered_config_data = sorted(config_data, key=lambda config: config['indice'])
+			for config in ordered_config_data:
+				if config['tipo'] == B_STRING_TYPE:
+					message.AddString(config['nome'], config['valore'])
+				elif config['tipo'] == B_INT32_TYPE:
+					message.AddInt32(config['nome'], config['valore'])
+				elif config['tipo'] == B_BOOL_TYPE:
+					message.AddBool(config['nome'], config['valore'])
+				#for i in config:
+				#	if isinstance(config[i][1],str):
+				#		message.AddString(i, config[i])
+				#	elif isinstance(config[i][1],int):
+				#		message.AddInt32(i, config[i])
+				#	elif isinstance(config[i][1],bool):
+				#		message.AddBool(i, config[i])
+				#ent,path=Ent_config()
+				jj,ll=lookfdata(".")
+				dir=BDirectory(ll)
+				file=BFile()
+				ret=dir.CreateFile(ll+"/settings.cfg",file)
+				message.Flatten(file)
+				file.Unset()
+				return True
+		except Exception as e:
+			print(f"Errore durante l'aggiunta o la scrittura dei dati: {e}")
+			return False
+	elif isinstance(config_data,BMessage):
 		ent,path=Ent_config()
 		file = BFile(path, B_WRITE_ONLY)
-		message.Flatten(file)
-		return True
-	except Exception as e:
-		print(f"Errore durante l'aggiunta o la scrittura dei dati: {e}")
-		return False
+		config_data.Flatten(file)
 
 def load_config(path):
 	message = BMessage()
-	config_data = {}
+	configuration_data = []
 	try:
-		message.Unflatten(path)
-		n=message.CountNames(B_ANY_TYPE) #B_STRING_TYPE o altri
-		ris=[]
-		typ=""
-		cont=0
-		message.GetInfo(B_STRING_TYPE,n,ris,typ,cont)
-		message.GetInfo(B_INT_TYPE,n,ris,typ,cont)
-		#RICOSTRUISCI CONFIG_DATA
-		
-		return config_data
+		message.Unflatten(BFile(path,0))
+		#message.PrintToStream()
+		ntot=message.CountNames(B_ANY_TYPE)
+		#print(f"ci sono {ntot} elementi")
+		#name=""
+		#typ=0
+		#cont=0
+		i=0
+		while i<ntot:
+			typ=B_ANY_TYPE
+			#ret=message.GetInfo(B_ANY_TYPE,i,name,typ,cont)
+			#print(ret,typ,i,name,typ,cont)
+			ret=message.GetInfo(typ,i)
+			if ret[0]==B_OK:
+				if ret[2] == B_STRING_TYPE:
+					c=0
+					while c<ret[3]:
+						valore=message.FindString(ret[1],c)
+						diz={'indice': i, 'nome': ret[1], 'tipo': ret[2], 'conteggio': c, 'valore':valore}
+						c+=1
+				elif ret[2] == B_INT32_TYPE:
+					c=0
+					while c<ret[3]:
+						valore=message.FindInt32(ret[1],c)
+						diz={'indice': i, 'nome': ret[1], 'tipo': ret[2], 'conteggio': c, 'valore':valore}
+						c+=1
+				elif ret[2] == B_BOOL_TYPE:
+					c=0
+					while c<ret[3]:
+						valore=message.FindInt32(ret[1],c)
+						diz={'indice': i, 'nome': ret[1], 'tipo': ret[2], 'conteggio': c, 'valore':valore}
+						c+=1
+				configuration_data.append(diz)
+			i+=1
+		return configuration_data
 	except Exception as e:
-		# Se il file non esiste o è corrotto, restituisce i dati predefiniti o vuoti
 		print(f"Errore durante il caricamento del file di configurazione: {e}")
-		return None # Indica un fallimento nel caricamento
+		return None
+
+jk,kl=lookfdata("settings.cfg")
+if not jk:
+	save_config([{'indice': 0, 'nome': "localization", 'tipo': B_STRING_TYPE, 'conteggio': 1, 'valore':"en"}])
 
 ent,path=Ent_config()
 if ent.Exists():
-	cd=load_config(path)
+	cd=load_config(path)		
+	print(cd)
 	if cd != None:
-		loc=cd["localization"]
+		found=False
+		for itm in cd:
+			if itm["nome"]=="localization":
+				loc=[itm["valore"]]
+				found=True
+				break
+		if not found:
+			loc=locale.getlocale()
 	else:
 		loc=locale.getlocale()
 else:
 	loc=locale.getlocale()
+
 if locale_dir!=None:
 	if loc[0] in lt:
 		try:
@@ -196,6 +240,8 @@ if locale_dir!=None:
 	else:
 		print("nessuna traduzione presente")
 		t = gettext.NullTranslations()
+else:
+	t = gettext.NullTranslations()
 			
 global _
 _ = t.gettext
@@ -233,6 +279,8 @@ class PView(BView):
 		self.SetFlags(B_WILL_DRAW)
 		self.SetResizingMode(B_FOLLOW_ALL_SIDES)
 		
+		self.dragmsg=struct.unpack('!l', b'MIME')[0]
+		
 	def UpdateImg(self,immagine):
 		self.Draw(self.Bounds())
 		self.immagine=immagine
@@ -248,7 +296,25 @@ class PView(BView):
 		#rect=BRect(0,0,self.frame.Width(),self.frame.Height())
 		rect=BRect(0,0,self.Bounds().Width(),self.Bounds().Height())
 		self.DrawBitmap(self.immagine,rect)
-
+	def MessageReceived(self, msg):
+		#msg.PrintToStream()
+		if msg.what == self.dragmsg:
+			ntot=msg.CountNames(B_MIME_TYPE)
+			i=0
+			while i<ntot-1:
+				l=[]
+				rtyp=0
+				cont=0
+				ret=msg.GetInfo(B_MIME_TYPE,i,l,rtyp,cont)
+				print("vecchio metodo",l,rtyp,cont)
+				ret=msg.GetInfo(B_MIME_TYPE,i) # NEW VERSION OF HAIKU-PYAPI
+				#print(ret[1],ret[2],ret[3])
+				xmsg=BMessage(73570)
+				xmsg.AddString("text",msg.FindData(ret[1],ret[2])[1].decode('utf-8'))
+				be_app.WindowAt(0).PostMessage(xmsg)
+				i+=1
+			return
+		BView.MessageReceived(self,msg)
 
 class AboutWindow(BWindow):
 	def __init__(self):
@@ -421,7 +487,7 @@ class HaiQRWindow(BWindow):
 					self.qrcreated = True
 			return
 			
-		if msg.what == 2:
+		elif msg.what == 2:
 			#SaveFilePanel
 			if self.qrcreated:
 				self.CanOpenPanel=False
@@ -429,7 +495,7 @@ class HaiQRWindow(BWindow):
 				#be_app.PostMessage(BMessage(11))
 			return
 
-		if msg.what == 54173:
+		elif msg.what == 54173:
 			#Save qr
 			b=entry_ref()
 			self.fp.GetPanelDirectory(b)
@@ -442,18 +508,18 @@ class HaiQRWindow(BWindow):
 			self.qrimg.save(completepath)
 			return
 
-		if msg.what == 3:
+		elif msg.what == 3:
 			#ABOUT
 			self.About = AboutWindow()
 			self.About.Show()
 			return
 			
-		if msg.what == 4:
+		elif msg.what == 4:
 			if self.qrcreated:
 				be_app.WindowAt(0).PostMessage(BMessage(1))
 			return
 				
-		if msg.what == 5:
+		elif msg.what == 5:
 			if not(self.ofp.IsShowing()):
 			#ADD OR REMOVE LOGO
 				if self.bar.FindItem(self.addlogo).IsMarked():
@@ -471,15 +537,15 @@ class HaiQRWindow(BWindow):
 						self.CanOpenPanel=False
 			return
 
-		if msg.what == 6:
+		elif msg.what == 6:
 			self.CanOpenPanel=True
 			return
 			
-		if msg.what == 112:
+		elif msg.what == 112:
 			self.logopath = msg.FindString("path=")
 			return
 			
-		if msg.what == 8:
+		elif msg.what == 8:
 			#HELP
 			perc=BPath()
 			find_directory(directory_which.B_SYSTEM_DOCUMENTATION_DIRECTORY,perc,False,None)
@@ -525,7 +591,9 @@ class HaiQRWindow(BWindow):
 						wa=BAlert('noo', _('No help pages installed'), _('Poor me'), None,None,InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_WARNING_ALERT)
 						wa.Go()
 			return
-
+		elif msg.what==73570:
+			txxt=msg.FindString("text")
+			self.tachetest.SetText(txxt)
 		BWindow.MessageReceived(self, msg)
 		
 	def FrameResized(self,x,y):
