@@ -1,7 +1,7 @@
 #!/boot/system/bin/python3
 jes=False
 try:
-	from Be import BApplication, BWindow, BBox, BRect, BTextControl, BView, BMenu, BMenuBar, BMenuItem, BSeparatorItem, AppDefs, BFont, BDirectory, BFile
+	from Be import BApplication, BWindow, BBox, BRect, BTextControl, BView, BMenu, BMenuBar, BMenuField, BMenuItem, BSeparatorItem, AppDefs, BFont, BDirectory, BFile
 	from Be import BMessage, BBitmap, BTextView, BButton, BStringItem, window_type, B_NOT_RESIZABLE, B_QUIT_ON_WINDOW_CLOSE, B_CLOSE_ON_ESCAPE
 	from Be import BStringView, BMimeType, BPoint, BAlert,BPath,InterfaceDefs,BScreen
 	from Be.View import *
@@ -19,6 +19,7 @@ try:
 	from Be.Entry import entry_ref
 	from Be.Entry import get_ref_for_path
 	from Be.Errors import B_OK
+	from Be.Accelerant import display_mode
 except:
 	print("error loading Haiku-PyAPI modules")
 	jes = True
@@ -168,14 +169,9 @@ def load_config(path):
 		#message.PrintToStream()
 		ntot=message.CountNames(B_ANY_TYPE)
 		#print(f"ci sono {ntot} elementi")
-		#name=""
-		#typ=0
-		#cont=0
 		i=0
 		while i<ntot:
 			typ=B_ANY_TYPE
-			#ret=message.GetInfo(B_ANY_TYPE,i,name,typ,cont)
-			#print(ret,typ,i,name,typ,cont)
 			ret=message.GetInfo(typ,i)
 			if ret[0]==B_OK:
 				if ret[2] == B_STRING_TYPE:
@@ -205,12 +201,11 @@ def load_config(path):
 
 jk,kl=lookfdata("settings.cfg")
 if not jk:
-	save_config([{'indice': 0, 'nome': "localization", 'tipo': B_STRING_TYPE, 'conteggio': 1, 'valore':"en"}])
+	save_config([{'indice': 0, 'nome': "localization", 'tipo': B_STRING_TYPE, 'conteggio': 1, 'valore':locale.getlocale()[0]}])
 
 ent,path=Ent_config()
 if ent.Exists():
 	cd=load_config(path)		
-	print(cd)
 	if cd != None:
 		found=False
 		for itm in cd:
@@ -316,6 +311,46 @@ class PView(BView):
 			return
 		BView.MessageReceived(self,msg)
 
+
+
+class CustomLang(BWindow):
+	myItems=[]
+	alerts=[]
+	def __init__(self):
+		a=display_mode()
+		BScreen().GetMode(a)
+		w=a.virtual_width
+		h=a.virtual_height
+		fon=BFont()
+		# Translators: window title
+		BWindow.__init__(self, BRect(w/2-200, h/2-fon.Size()-10, w/2+200, h/2+(fon.Size()*2.5)),_("CustomLang"),window_type.B_BORDERED_WINDOW, B_NOT_RESIZABLE|B_CLOSE_ON_ESCAPE)
+		self.bckgnd=BBox(self.Bounds(),"bckgnd_customlang",B_FOLLOW_NONE,B_WILL_DRAW,border_style.B_NO_BORDER)
+		
+		self.AddChild(self.bckgnd,None)
+		self.menulocaliz=BMenu(_("Localizations"))
+		self.menulocaliz.SetLabelFromMarked(True)
+		bounds=self.bckgnd.Bounds()
+		l=bounds.left
+		t=bounds.top
+		r=bounds.right
+		b=bounds.bottom
+		self.bottomstring=BStringView(BRect(l,b-fon.Size(),r,b),"hint",_("Note: any change requires a restart"))
+		for y in lt:
+			self.myItems.append(LocalizItem(y))#<fix doublefree
+			self.menulocaliz.AddItem(self.myItems[-1])
+		self.menuloc = BMenuField(BRect(5,5,r-5,b-5), 'pop0', _("Interface localization"), self.menulocaliz,B_FOLLOW_TOP)
+		self.bckgnd.AddChild(self.menuloc,None)
+		self.bckgnd.AddChild(self.bottomstring,None)
+		
+	def MessageReceived(self, msg):
+		if msg.what == 600:
+			be_app.WindowAt(0).PostMessage(msg)
+			self.Quit()
+			return
+		BWindow.MessageReceived(self,msg)
+
+
+
 class AboutWindow(BWindow):
 	def __init__(self):
 		scr=BScreen()
@@ -406,10 +441,10 @@ class AboutWindow(BWindow):
 class HaiQRWindow(BWindow):
 	addlogo=_("Add Logo")
 	Menus = (
-		(_('File'), ((1, _('Generate QR')),(2, _('Save QR')),(5, addlogo),(None, None),(AppDefs.B_QUIT_REQUESTED, _('Quit')))),
+		(_('File'), ((1, _('Generate QR')),(2, _('Save QR')),(5, addlogo),(None, None),(7, _("Set Language")),(None, None),(AppDefs.B_QUIT_REQUESTED, _('Quit')))),
 		(_('Help'), ((8, _('Help')),(3, _('About'))))
 		)
-		
+	alerts=[]
 	def __init__(self, frame):
 		selectionmenu=0
 		BWindow.__init__(self, frame, _('QR generator for Haiku'), window_type.B_TITLED_WINDOW,B_QUIT_ON_WINDOW_CLOSE)#|B_CLOSE_ON_ESCAPE)
@@ -540,6 +575,10 @@ class HaiQRWindow(BWindow):
 		elif msg.what == 6:
 			self.CanOpenPanel=True
 			return
+		
+		elif msg.what == 7:
+			self.CustLang=CustomLang()
+			self.CustLang.Show()
 			
 		elif msg.what == 112:
 			self.logopath = msg.FindString("path=")
@@ -589,11 +628,17 @@ class HaiQRWindow(BWindow):
 							nopages=False
 					if nopages:
 						wa=BAlert('noo', _('No help pages installed'), _('Poor me'), None,None,InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_WARNING_ALERT)
+						self.alerts.append(wa)
 						wa.Go()
 			return
 		elif msg.what==73570:
 			txxt=msg.FindString("text")
 			self.tachetest.SetText(txxt)
+		elif msg.what==600:
+			lang=msg.FindString("name")
+			print(lang)
+			#TODO: salvare in settings.cfg
+
 		BWindow.MessageReceived(self, msg)
 		
 	def FrameResized(self,x,y):
@@ -606,12 +651,14 @@ class HaiQRWindow(BWindow):
 		#del self.ofp
 		#del self.fp
 		print ("So long and thanks for all the fish")
+		#be_app.Quit()
 		return BWindow.QuitRequested(self)
 
 class App(BApplication):
     def __init__(self):
         BApplication.__init__(self, "application/x-HaiQR-python3")
         self.txtpath=""
+        self.alerts=[]
     def ReadyToRun(self):
         self.window = HaiQRWindow(BRect(100,80,600,600))
         self.window.Show()
@@ -639,6 +686,7 @@ class App(BApplication):
                         else:
                             #I cannot use this image
                             z = BAlert('Nimg', _('I cannot use this image\nSelect another one?'), _('Yes'), _('No'), None, InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_WARNING_ALERT)
+                            self.alerts.append(z)
                             ret = z.Go()
                             if ret == 1:
                                 break # aborts adding logo
@@ -651,6 +699,7 @@ class App(BApplication):
                         #"It's not an image"
                         be_app.WindowAt(0).PostMessage(5)
                         z = BAlert('Nimg', _('This is not an image\nRetry?'), _('Yes'), _('No'), None, InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_WARNING_ALERT)
+                        self.alerts.append(z)
                         ret = z.Go()
                         if ret == 1:
                             break # aborts adding logo
