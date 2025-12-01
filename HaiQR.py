@@ -48,7 +48,7 @@ def Ent_config():
 	datapath=BDirectory(perc.Path()+"/HaiQR2")
 	ent=BEntry(datapath,perc.Path()+"/HaiQR2")
 	if not ent.Exists():
-		datapath.CreateDirectory(perc.Path()+"/HaiQR2", datapath)
+		datapath.CreateDirectory(perc.Path()+"/HaiQR2", None)#datapath)
 	ent.GetPath(perc)
 	confile=BPath(perc.Path()+'/settings.cfg',None,False)
 	ent=BEntry(confile.Path())
