@@ -47,7 +47,7 @@ def Ent_config():
 	find_directory(directory_which.B_USER_NONPACKAGED_DATA_DIRECTORY,perc,False,None)
 	datapath=BDirectory(perc.Path()+"/HaiQR2")
 	ent=BEntry(datapath,perc.Path()+"/HaiQR2")
-	if not ent.Exists():
+	if not ent.Exists() and ent.IsDirectory():
 		datapath.CreateDirectory(perc.Path()+"/HaiQR2", None)#datapath)
 	ent.GetPath(perc)
 	confile=BPath(perc.Path()+'/settings.cfg',None,False)
