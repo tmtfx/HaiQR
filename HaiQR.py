@@ -142,7 +142,6 @@ def save_config(config_data):
 				#jj,ll=lookfdata(".")
 				ent,path=Ent_config()
 				if ent.Exists():
-					print("assegno lettura a file di configurazione")
 					file=BFile(path,B_READ_WRITE)
 				else:
 					print("creo file di configurazione")
