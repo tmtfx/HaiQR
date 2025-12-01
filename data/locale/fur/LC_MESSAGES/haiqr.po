@@ -8,10 +8,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: haiqr-2.1.a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-26 09:28+0100\n"
-"PO-Revision-Date: 2025-11-27 20:13+0000\n"
+"POT-Creation-Date: 2025-12-01 17:56+0100\n"
+"PO-Revision-Date: 2025-12-01 17:03+0000\n"
 "Last-Translator: Fabio Tomat <f.t.public@gmail.com>\n"
-"Language-Team: Italian <f.t.public@gmail.com>\n"
+"Language-Team: Friulian <f.t.public@gmail.com>\n"
 "Language: fur\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -21,28 +21,45 @@ msgstr ""
 "X-Generator: HaiPO 2.5 beta\n"
 
 #. Translators: The app name, don't translate, only transliterate
-#: HaiQR.py:223
+#: ../HaiQR.py:266
 msgid "HaiQR2"
 msgstr "HaiQR2"
 
 #. Translators: state of release like: alpha, beta, release
-#: HaiQR.py:226
+#: ../HaiQR.py:269
 msgid "alpha"
 msgstr "alpha"
 
-#: HaiQR.py:259 HaiQR.py:344
+#. Translators: window title
+#: ../HaiQR.py:328
+msgid "CustomLang"
+msgstr "Lenghe personalizade"
+
+#: ../HaiQR.py:332
+msgid "Localizations"
+msgstr "Localizazions"
+
+#: ../HaiQR.py:339
+msgid "Note: any change requires a restart"
+msgstr "Note: torne invie la aplicazion se tu cambis lenghe"
+
+#: ../HaiQR.py:343
+msgid "Interface localization"
+msgstr "Localizazion de interface"
+
+#: ../HaiQR.py:362 ../HaiQR.py:447
 msgid "About"
 msgstr "Informazions"
 
-#: HaiQR.py:281
+#: ../HaiQR.py:384
 msgid "image missing"
 msgstr "e mancje la imagjin"
 
-#: HaiQR.py:293
+#: ../HaiQR.py:396
 msgid "version"
 msgstr "version"
 
-#: HaiQR.py:294
+#: ../HaiQR.py:397
 msgid ""
 "\n"
 "\n"
@@ -58,7 +75,7 @@ msgstr ""
 "Chest al è un sempliç gjeneradôr di imagjins cun codiç QR scrit in Python 3.10 + Haiku-PyAPI e il modul qrcode\n"
 "\n"
 
-#: HaiQR.py:295
+#: ../HaiQR.py:398
 msgid ""
 " is a reworked update of HaiQR which used python2 and Bethon.\n"
 "\n"
@@ -68,7 +85,7 @@ msgstr ""
 "\n"
 "Cheste version e je in stât "
 
-#: HaiQR.py:296
+#: ../HaiQR.py:399
 msgid ""
 " state\n"
 "\t\t\t\t\t\t\t\t\tdesigned by Fabio Tomat (TmTFx)\n"
@@ -80,51 +97,55 @@ msgstr ""
 "\n"
 "\t\tfrache ESC par sierâ chest barcon"
 
-#: HaiQR.py:341
+#: ../HaiQR.py:444
 msgid "Add Logo"
 msgstr "Zonte logo"
 
-#: HaiQR.py:343
+#: ../HaiQR.py:446
 msgid "File"
 msgstr "File"
 
-#: HaiQR.py:343
+#: ../HaiQR.py:446
 msgid "Generate QR"
 msgstr "Gjenere QR"
 
-#: HaiQR.py:343
+#: ../HaiQR.py:446
 msgid "Save QR"
 msgstr "Salve QR"
 
-#: HaiQR.py:343
+#: ../HaiQR.py:446
+msgid "Set Language"
+msgstr "Configure lenghe"
+
+#: ../HaiQR.py:446
 msgid "Quit"
 msgstr "Jes"
 
-#: HaiQR.py:344
+#: ../HaiQR.py:447
 msgid "Help"
 msgstr "Jutori"
 
-#: HaiQR.py:349
+#: ../HaiQR.py:452
 msgid "QR generator for Haiku"
 msgstr "Gjeneradôr di QRs par Haiku"
 
-#: HaiQR.py:370
+#: ../HaiQR.py:473
 msgid "Paste here:"
 msgstr "Tache achì:"
 
-#: HaiQR.py:383
+#: ../HaiQR.py:486
 msgid "QR it!"
 msgstr "Fâs!"
 
-#: HaiQR.py:525
+#: ../HaiQR.py:632
 msgid "No help pages installed"
 msgstr "Nissune pagjine di jutori instalade"
 
-#: HaiQR.py:525
+#: ../HaiQR.py:632
 msgid "Poor me"
 msgstr "Biât jo"
 
-#: HaiQR.py:573
+#: ../HaiQR.py:699
 msgid ""
 "I cannot use this image\n"
 "Select another one?"
@@ -132,15 +153,15 @@ msgstr ""
 "No pues doprâ cheste imagjin\n"
 "Selezionâ une altre?"
 
-#: HaiQR.py:573 HaiQR.py:585
+#: ../HaiQR.py:699 ../HaiQR.py:712
 msgid "Yes"
 msgstr "Sì"
 
-#: HaiQR.py:573 HaiQR.py:585
+#: ../HaiQR.py:699 ../HaiQR.py:712
 msgid "No"
 msgstr "No"
 
-#: HaiQR.py:585
+#: ../HaiQR.py:712
 msgid ""
 "This is not an image\n"
 "Retry?"
