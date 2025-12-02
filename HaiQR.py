@@ -178,19 +178,19 @@ def load_config(path):
 				if ret[2] == B_STRING_TYPE:
 					c=0
 					while c<ret[3]:
-						valore=message.FindString(ret[1],c)
+						status,valore=message.FindString(ret[1],c)
 						diz={'indice': i, 'nome': ret[1], 'tipo': ret[2], 'conteggio': c, 'valore':valore}
 						c+=1
 				elif ret[2] == B_INT32_TYPE:
 					c=0
 					while c<ret[3]:
-						valore=message.FindInt32(ret[1],c)
+						status,valore=message.FindInt32(ret[1],c)
 						diz={'indice': i, 'nome': ret[1], 'tipo': ret[2], 'conteggio': c, 'valore':valore}
 						c+=1
 				elif ret[2] == B_BOOL_TYPE:
 					c=0
 					while c<ret[3]:
-						valore=message.FindInt32(ret[1],c)
+						status,valore=message.FindInt32(ret[1],c)
 						diz={'indice': i, 'nome': ret[1], 'tipo': ret[2], 'conteggio': c, 'valore':valore}
 						c+=1
 				configuration_data.append(diz)
@@ -538,7 +538,7 @@ class HaiQRWindow(BWindow):
 			d=BPath()
 			c.GetPath(d)
 			savepath=d.Path()
-			e = msg.FindString("name")
+			status,e = msg.FindString("name")
 			completepath = savepath +"/"+ e
 			self.qrimg.save(completepath)
 			return
@@ -581,7 +581,7 @@ class HaiQRWindow(BWindow):
 			self.CustLang.Show()
 			
 		elif msg.what == 112:
-			self.logopath = msg.FindString("path=")
+			status,self.logopath = msg.FindString("path=")
 			return
 			
 		elif msg.what == 8:
@@ -632,21 +632,21 @@ class HaiQRWindow(BWindow):
 						wa.Go()
 			return
 		elif msg.what==73570:
-			txxt=msg.FindString("text")
-			self.tachetest.SetText(txxt)
+			status,txxt=msg.FindString("text")
+			if status==B_OK:
+				self.tachetest.SetText(txxt)
 		elif msg.what==600:
-			lang=msg.FindString("name")
-			ent,path=Ent_config()
-			if ent.Exists():
-				cd=load_config(path)
-				for i in cd:
-					if i['nome'] == "localization":
-						i["valore"]=lang
-						save_config(cd)
-						break
-			return
-			#print(lang)
-			#TODO: salvare in settings.cfg
+			status,lang=msg.FindString("name")
+			if status==B_OK:
+				ent,path=Ent_config()
+				if ent.Exists():
+					cd=load_config(path)
+					for i in cd:
+						if i['nome'] == "localization":
+							i["valore"]=lang
+							save_config(cd)
+							break
+				return
 
 		BWindow.MessageReceived(self, msg)
 		
@@ -677,9 +677,10 @@ class App(BApplication):
             i = 0
             while 1:
                 try:
-                #if True:
-                    e=entry_ref()
-                    rino = msg.FindRef("refs", i,e)
+					#old way
+                    #e=entry_ref()
+                    #rino = msg.FindRef("refs", i,e)
+                    status,e=msg.FindRef("refs",i)
                     entryref = BEntry(e,True)
                     bpatho=BPath()
                     entryref.GetPath(bpatho)
@@ -727,10 +728,11 @@ class App(BApplication):
                 i = i + 1
     def MessageReceived(self, msg):
         if msg.what == B_SAVE_REQUESTED:
-            e = msg.FindString("name")
-            messaggio = BMessage(54173)
-            messaggio.AddString("name",e)
-            be_app.WindowAt(0).PostMessage(messaggio)
+            status,e = msg.FindString("name")
+            if status == B_OK:
+                messaggio = BMessage(54173)
+                messaggio.AddString("name",e)
+                be_app.WindowAt(0).PostMessage(messaggio)
             return
         elif msg.what == B_CANCEL:
             if self.txtpath=="":
