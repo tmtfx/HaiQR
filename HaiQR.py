@@ -445,7 +445,7 @@ class HaiQRWindow(BWindow):
 		(_('Help'), ((8, _('Help')),(3, _('About'))))
 		)
 	alerts=[]
-	def __init__(self, frame):
+	def __init__(self, frame,arg):
 		selectionmenu=0
 		BWindow.__init__(self, frame, _('QR generator for Haiku'), window_type.B_TITLED_WINDOW,B_QUIT_ON_WINDOW_CLOSE)#|B_CLOSE_ON_ESCAPE)
 		bounds = self.Bounds()
@@ -498,6 +498,10 @@ class HaiQRWindow(BWindow):
 		self.logopath = ""
 		self.qrcreated = False
 		self.CanOpenPanel=True
+		if arg!="":
+			self.tachetest.SetText(arg)
+			be_app.WindowAt(0).PostMessage(1)
+			
 		
 
 	def MessageReceived(self, msg):
@@ -664,95 +668,110 @@ class HaiQRWindow(BWindow):
 		return BWindow.QuitRequested(self)
 
 class App(BApplication):
-    def __init__(self):
-        BApplication.__init__(self, "application/x-HaiQR-python3")
-        self.txtpath=""
-        self.alerts=[]
-    def ReadyToRun(self):
-        self.window = HaiQRWindow(BRect(100,80,600,600))
-        self.window.Show()
-    def RefsReceived(self, msg):
-        #msg.PrintToStream()
-        if msg.what == B_REFS_RECEIVED:
-            i = 0
-            while 1:
-                try:
+	realargs=""
+	def __init__(self):
+		BApplication.__init__(self, "application/x-HaiQR-python3")
+		self.txtpath=""
+		self.alerts=[]
+	def ReadyToRun(self):
+		rect=BRect(100,80,600,600)
+		if len(self.realargs) == 0:
+			self.window = HaiQRWindow(rect,"")
+		else:
+			self.window = HaiQRWindow(rect,self.realargs)
+		
+		self.window.Show()
+	def RefsReceived(self, msg):
+		#msg.PrintToStream()
+		if msg.what == B_REFS_RECEIVED:
+			i = 0
+			while 1:
+				try:
 					#old way
-                    #e=entry_ref()
-                    #rino = msg.FindRef("refs", i,e)
-                    status,e=msg.FindRef("refs",i)
-                    entryref = BEntry(e,True)
-                    bpatho=BPath()
-                    entryref.GetPath(bpatho)
-                    self.txtpath= bpatho.Path()
-                    ###### CHECK FOR IMAGE MIME TYPE
-                    mime = BMimeType()
-                    BMimeType.GuessMimeType(self.txtpath,mime)
-                    mimetype = repr(mime.Type())
-                    supertype,subtype = mimetype.split('/')
-                    if (supertype.replace('\'','') == "image"):
-                        if mime.IsInstalled():
-                            pass #I can use the image
-                        else:
-                            #I cannot use this image
-                            z = BAlert('Nimg', _('I cannot use this image\nSelect another one?'), _('Yes'), _('No'), None, InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_WARNING_ALERT)
-                            self.alerts.append(z)
-                            ret = z.Go()
-                            if ret == 1:
-                                break # aborts adding logo
-                            else:
-                                # Retry: open panel
-                                be_app.WindowAt(0).PostMessage(6)
-                                be_app.WindowAt(0).PostMessage(5)
-                                break
-                    else:
-                        #"It's not an image"
-                        be_app.WindowAt(0).PostMessage(5)
-                        z = BAlert('Nimg', _('This is not an image\nRetry?'), _('Yes'), _('No'), None, InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_WARNING_ALERT)
-                        self.alerts.append(z)
-                        ret = z.Go()
-                        if ret == 1:
-                            break # aborts adding logo
-                        else:
-                            # Retry: open panel
-                            be_app.WindowAt(0).PostMessage(6)
-                            be_app.WindowAt(0).PostMessage(5)
-                            break
-                    a=BMessage(112)
-                    a.AddString("path=",self.txtpath)
-                    be_app.WindowAt(0).PostMessage(a)
-                except:
-                    e = None
-                if e is None:
-                    break
-                i = i + 1
-    def MessageReceived(self, msg):
-        if msg.what == B_SAVE_REQUESTED:
-            status,e = msg.FindString("name")
-            if status == B_OK:
-                messaggio = BMessage(54173)
-                messaggio.AddString("name",e)
-                be_app.WindowAt(0).PostMessage(messaggio)
-            return
-        elif msg.what == B_CANCEL:
-            if self.txtpath=="":
-                #se nissun file di salvaa
-                be_app.WindowAt(0).PostMessage(BMessage(5))
-                be_app.WindowAt(0).PostMessage(BMessage(6))
-            else:
-                #se file viert inzorne imagjin
-                be_app.WindowAt(0).PostMessage(BMessage(4))
-                be_app.WindowAt(0).PostMessage(BMessage(6))
-            return
+					#e=entry_ref()
+					#rino = msg.FindRef("refs", i,e)
+					status,e=msg.FindRef("refs",i)
+					entryref = BEntry(e,True)
+					bpatho=BPath()
+					entryref.GetPath(bpatho)
+					self.txtpath= bpatho.Path()
+					###### CHECK FOR IMAGE MIME TYPE
+					mime = BMimeType()
+					BMimeType.GuessMimeType(self.txtpath,mime)
+					mimetype = repr(mime.Type())
+					supertype,subtype = mimetype.split('/')
+					if (supertype.replace('\'','') == "image"):
+						if mime.IsInstalled():
+							pass #I can use the image
+						else:
+							#I cannot use this image
+							z = BAlert('Nimg', _('I cannot use this image\nSelect another one?'), _('Yes'), _('No'), None, InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_WARNING_ALERT)
+							self.alerts.append(z)
+							ret = z.Go()
+							if ret == 1:
+								break # aborts adding logo
+							else:
+								# Retry: open panel
+								be_app.WindowAt(0).PostMessage(6)
+								be_app.WindowAt(0).PostMessage(5)
+								break
+					else:
+						#"It's not an image"
+						be_app.WindowAt(0).PostMessage(5)
+						z = BAlert('Nimg', _('This is not an image\nRetry?'), _('Yes'), _('No'), None, InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_WARNING_ALERT)
+						self.alerts.append(z)
+						ret = z.Go()
+						if ret == 1:
+							break # aborts adding logo
+						else:
+							# Retry: open panel
+							be_app.WindowAt(0).PostMessage(6)
+							be_app.WindowAt(0).PostMessage(5)
+							break
+					a=BMessage(112)
+					a.AddString("path=",self.txtpath)
+					be_app.WindowAt(0).PostMessage(a)
+				except:
+					e = None
+				if e is None:
+					break
+				i = i + 1
+	def ArgvReceived(self,num,args):
+		#realargs=args
+		if args[1][-8:]=="HaiQR.py" or args[1][-5:]=="HaiQR":
+			#launched by terminal or by link in non-packaged/bin
+			args.pop(1)
+			args.pop(0)
+			print(args)
+			joinedrealargs=" ".join(args)
+			self.realargs=joinedrealargs
+	def MessageReceived(self, msg):
+		if msg.what == B_SAVE_REQUESTED:
+			status,e = msg.FindString("name")
+			if status == B_OK:
+				messaggio = BMessage(54173)
+				messaggio.AddString("name",e)
+				be_app.WindowAt(0).PostMessage(messaggio)
+			return
+		elif msg.what == B_CANCEL:
+			if self.txtpath=="":
+				#se nissun file di salvaa
+				be_app.WindowAt(0).PostMessage(BMessage(5))
+				be_app.WindowAt(0).PostMessage(BMessage(6))
+			else:
+				#se file viert inzorne imagjin
+				be_app.WindowAt(0).PostMessage(BMessage(4))
+				be_app.WindowAt(0).PostMessage(BMessage(6))
+			return
 			
-        elif msg.what == 11:
-            #Fix for bug: "Default button" is disabled on fp.Show()
-            be_app.WindowAt(1).PostMessage(B_KEY_DOWN)
-            return
+		elif msg.what == 11:
+			#Fix for bug: "Default button" is disabled on fp.Show()
+			be_app.WindowAt(1).PostMessage(B_KEY_DOWN)
+			return
 			
-        elif msg.what == 311:
-            self.txtpath = ""
-            return
+		elif msg.what == 311:
+			self.txtpath = ""
+			return
 
 def main():
     global be_app
