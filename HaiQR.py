@@ -737,12 +737,10 @@ class App(BApplication):
 					break
 				i = i + 1
 	def ArgvReceived(self,num,args):
-		#realargs=args
 		if args[1][-8:]=="HaiQR.py" or args[1][-5:]=="HaiQR":
 			#launched by terminal or by link in non-packaged/bin
 			args.pop(1)
 			args.pop(0)
-			print(args)
 			joinedrealargs=" ".join(args)
 			self.realargs=joinedrealargs
 	def MessageReceived(self, msg):
@@ -755,7 +753,7 @@ class App(BApplication):
 			return
 		elif msg.what == B_CANCEL:
 			if self.txtpath=="":
-				#se nissun file di salvaa
+				#se nissun file di salvâ
 				be_app.WindowAt(0).PostMessage(BMessage(5))
 				be_app.WindowAt(0).PostMessage(BMessage(6))
 			else:
