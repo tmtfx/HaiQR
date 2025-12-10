@@ -39,6 +39,9 @@ fi
 echo
 if [ -e HaiQR.py ]
 then
+	if [ -e data/QRGen2.hvif ]; then
+		addattr -t \'VICN\' BEOS:ICON -f data/QRGen2.hvif HaiQR.py
+	fi
 	if ! [[ -e /boot/home/config/non-packaged/data/HaiQR2 ]]; then
 		mkdir /boot/home/config/non-packaged/data/HaiQR2
 	fi
