@@ -262,9 +262,9 @@ def find_byte(lookf,looka,offset=0):
 		return -1
 # Translators: The app name, don't translate, only transliterate
 appname=_("HaiQR2")
-version="2.1"
+version="2.2"
 # Translators: state of release like: alpha, beta, release
-state=_("alpha")
+state=_("beta")
 
 class PView(BView):
 	def __init__(self,frame,name,immagine):
@@ -288,30 +288,20 @@ class PView(BView):
 
 	def Draw(self,rect):
 		BView.Draw(self,rect)
-		#rect=BRect(0,0,self.frame.Width(),self.frame.Height())
 		rect=BRect(0,0,self.Bounds().Width(),self.Bounds().Height())
 		self.DrawBitmap(self.immagine,rect)
 	def MessageReceived(self, msg):
-		#msg.PrintToStream()
 		if msg.what == self.dragmsg:
 			ntot=msg.CountNames(B_MIME_TYPE)
 			i=0
 			while i<ntot-1:
-				l=[]
-				rtyp=0
-				cont=0
-				ret=msg.GetInfo(B_MIME_TYPE,i,l,rtyp,cont)
-				print("vecchio metodo",l,rtyp,cont)
 				ret=msg.GetInfo(B_MIME_TYPE,i) # NEW VERSION OF HAIKU-PYAPI
-				#print(ret[1],ret[2],ret[3])
 				xmsg=BMessage(73570)
 				xmsg.AddString("text",msg.FindData(ret[1],ret[2])[1].decode('utf-8'))
 				be_app.WindowAt(0).PostMessage(xmsg)
 				i+=1
 			return
 		BView.MessageReceived(self,msg)
-
-
 
 class CustomLang(BWindow):
 	myItems=[]
@@ -336,7 +326,7 @@ class CustomLang(BWindow):
 		b=bounds.bottom
 		self.bottomstring=BStringView(BRect(l,b-fon.Size(),r,b),"hint",_("Note: any change requires a restart"))
 		for y in lt:
-			self.myItems.append(LocalizItem(y))#<fix doublefree
+			self.myItems.append(LocalizItem(y))#<fixes doublefree
 			self.menulocaliz.AddItem(self.myItems[-1])
 		self.menuloc = BMenuField(BRect(5,5,r-5,b-5), 'pop0', _("Interface localization"), self.menulocaliz,B_FOLLOW_TOP)
 		self.bckgnd.AddChild(self.menuloc,None)
@@ -391,7 +381,7 @@ class AboutWindow(BWindow):
 		self.AboutText.MakeEditable(False)
 		self.AboutText.MakeSelectable(False)
 		self.AboutText.SetStylable(True)
-		ts1=_("version")#\t-\t
+		ts1=_("version")
 		ts2=_("\n\nA simple QR generator for Haiku.\n\nThis is a simple QR generator written in Python 3.10 + Haiku-PyAPI and qrcode module\n\n")
 		ts3=_(" is a reworked update of HaiQR which used python2 and Bethon.\n\nThis version is in ")
 		ts4=_(" state\n\t\t\t\t\t\t\t\t\tdesigned by Fabio Tomat (TmTFx)\n\n\t\tpress ESC to close this window")
@@ -463,9 +453,8 @@ class HaiQRWindow(BWindow):
 		self.bckgnd.AddChild(self.bar,None)
 		self.AddChild(self.bckgnd,None)
 		##### COLOR GRAY UNDER LISTS
-		self.underlist = BBox(BRect(0, barheight, bounds.Width(), bounds.Height()), 'underlist',0x0202|0x0404,border_style.B_FANCY_BORDER)#, B_FOLLOW_ALL, 2000000|B_NAVIGABLE, border_style.B_FANCY_BORDER) #B_FULL_UPDATE_ON_RESIZE|
+		self.underlist = BBox(BRect(0, barheight, bounds.Width(), bounds.Height()), 'underlist',0x0202|0x0404,border_style.B_FANCY_BORDER)
 		underbounds=self.underlist.Bounds()
-		#self.underlist.SetResizingMode(B_FOLLOW_ALL_SIDES)
 		self.bckgnd.AddChild(self.underlist,None)
 		a=BFont()
 		labello=_("Paste here:")
@@ -488,8 +477,7 @@ class HaiQRWindow(BWindow):
 		self.qrframe=PView(BRect(30,30,underbounds.Width()-30,underbounds.Height()-85),"photoframe",None)
 		self.underlist.AddChild(self.qrframe,None)
 		###### SAVE PANEL
-		#print(int(B_SAVE_PANEL))
-		self.fp=BFilePanel(B_SAVE_PANEL,None,None,0,False, None, None, True, True)#B_SAVE_PANEL)
+		self.fp=BFilePanel(B_SAVE_PANEL,None,None,0,False, None, None, True, True)
 		self.fp.SetPanelDirectory("/boot/home/Desktop")
 		self.fp.SetSaveText("prova.png")
 		###### OPEN PANEL
@@ -501,8 +489,6 @@ class HaiQRWindow(BWindow):
 		if arg!="":
 			self.tachetest.SetText(arg)
 			be_app.WindowAt(0).PostMessage(1)
-			
-		
 
 	def MessageReceived(self, msg):
 		if msg.what == 1:
@@ -512,7 +498,7 @@ class HaiQRWindow(BWindow):
 				self.qr.clear()
 				self.qr.add_data(self.tachetest.Text())
 				self.qr.make(fit=True)
-				self.qrimg=self.qr.make_image(fill_color="black",back_color="white")#.convert('RGB')
+				self.qrimg=self.qr.make_image(fill_color="black",back_color="white")
 				if self.logopath != "":
 					logo_display = Image.open(self.logopath)
 					logo_display.thumbnail((60, 60))
@@ -609,28 +595,12 @@ class HaiQRWindow(BWindow):
 					t = Thread(target=os.system,args=(cmd,))
 					t.run()
 				else:
-					nopages=True
-					cwd = os.getcwd()
-					link=cwd+"/data/index.html"
-					ent=BEntry(link)
-					if ent.Exists():
-						#open git downloaded help by cmdline
-						cmd = "open "+link
+					e,pth=lookfdata('index.html')
+					if e:
+						cmd = "open "+pth
 						t = Thread(target=os.system,args=(cmd,))
 						t.run()
-						nopages=False
 					else:
-						alt="".join(sys.argv)
-						mydir=os.path.dirname(alt)
-						link=mydir+"/data/index.html"
-						ent=BEntry(link)
-						if ent.Exists():
-							#open git downloaded help bygraphiclaunch
-							cmd = "open "+link
-							t = Thread(target=os.system,args=(cmd,))
-							t.run()
-							nopages=False
-					if nopages:
 						wa=BAlert('noo', _('No help pages installed'), _('Poor me'), None,None,InterfaceDefs.B_WIDTH_AS_USUAL,alert_type.B_WARNING_ALERT)
 						self.alerts.append(wa)
 						wa.Go()
@@ -655,7 +625,7 @@ class HaiQRWindow(BWindow):
 		BWindow.MessageReceived(self, msg)
 		
 	def FrameResized(self,x,y):
-		self.bckgnd.ResizeTo(x,y)#self.bckgnd.Bounds().left,self.bckgnd.Bounds().top,self.bckgnd.Bounds().right+x,self.bckgnd.Bounds().bottom+y)
+		self.bckgnd.ResizeTo(x,y)
 		self.bar.ResizeTo(self.bckgnd.Bounds().right,self.bar.Bounds().bottom)
 		self.underlist.ResizeTo(self.bckgnd.Bounds().right,self.bckgnd.Bounds().bottom-self.bar.Bounds().Height())
 		self.qrframe.ResizeTo(x-60,y-self.bar.Bounds().Height()-60-self.tachetest.Bounds().Height()-24)
@@ -664,7 +634,6 @@ class HaiQRWindow(BWindow):
 		#del self.ofp
 		#del self.fp
 		print ("So long and thanks for all the fish")
-		#be_app.Quit()
 		return BWindow.QuitRequested(self)
 
 class App(BApplication):
@@ -682,14 +651,10 @@ class App(BApplication):
 		
 		self.window.Show()
 	def RefsReceived(self, msg):
-		#msg.PrintToStream()
 		if msg.what == B_REFS_RECEIVED:
 			i = 0
 			while 1:
 				try:
-					#old way
-					#e=entry_ref()
-					#rino = msg.FindRef("refs", i,e)
 					status,e=msg.FindRef("refs",i)
 					entryref = BEntry(e,True)
 					bpatho=BPath()
