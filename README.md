@@ -1,5 +1,5 @@
 # HaiQR
-HaiQR v2.1.a
+HaiQR v2.2.b
 
 Simple python application for Haiku that generates QRs from text.
 
