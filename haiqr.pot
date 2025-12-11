@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-01 17:56+0100\n"
+"POT-Creation-Date: 2025-12-11 23:00+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,45 +18,40 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #. Translators: The app name, don't translate, only transliterate
-#: ../HaiQR.py:266
+#: HaiQR.py:264
 msgid "HaiQR2"
 msgstr ""
 
 #. Translators: state of release like: alpha, beta, release
-#: ../HaiQR.py:269
-msgid "alpha"
+#: HaiQR.py:267
+msgid "beta"
 msgstr ""
 
-#. Translators: window title
-#: ../HaiQR.py:328
-msgid "CustomLang"
-msgstr ""
-
-#: ../HaiQR.py:332
+#: HaiQR.py:320
 msgid "Localizations"
 msgstr ""
 
-#: ../HaiQR.py:339
+#: HaiQR.py:327
 msgid "Note: any change requires a restart"
 msgstr ""
 
-#: ../HaiQR.py:343
+#: HaiQR.py:331
 msgid "Interface localization"
 msgstr ""
 
-#: ../HaiQR.py:362 ../HaiQR.py:447
+#: HaiQR.py:350 HaiQR.py:435
 msgid "About"
 msgstr ""
 
-#: ../HaiQR.py:384
+#: HaiQR.py:372
 msgid "image missing"
 msgstr ""
 
-#: ../HaiQR.py:396
+#: HaiQR.py:384
 msgid "version"
 msgstr ""
 
-#: ../HaiQR.py:397
+#: HaiQR.py:385
 msgid ""
 "\n"
 "\n"
@@ -67,14 +62,14 @@ msgid ""
 "\n"
 msgstr ""
 
-#: ../HaiQR.py:398
+#: HaiQR.py:386
 msgid ""
 " is a reworked update of HaiQR which used python2 and Bethon.\n"
 "\n"
 "This version is in "
 msgstr ""
 
-#: ../HaiQR.py:399
+#: HaiQR.py:387
 msgid ""
 " state\n"
 "\t\t\t\t\t\t\t\t\tdesigned by Fabio Tomat (TmTFx)\n"
@@ -82,69 +77,69 @@ msgid ""
 "\t\tpress ESC to close this window"
 msgstr ""
 
-#: ../HaiQR.py:444
+#: HaiQR.py:432
 msgid "Add Logo"
 msgstr ""
 
-#: ../HaiQR.py:446
+#: HaiQR.py:434
 msgid "File"
 msgstr ""
 
-#: ../HaiQR.py:446
+#: HaiQR.py:434
 msgid "Generate QR"
 msgstr ""
 
-#: ../HaiQR.py:446
+#: HaiQR.py:434
 msgid "Save QR"
 msgstr ""
 
-#: ../HaiQR.py:446
+#: HaiQR.py:434
 msgid "Set Language"
 msgstr ""
 
-#: ../HaiQR.py:446
+#: HaiQR.py:434
 msgid "Quit"
 msgstr ""
 
-#: ../HaiQR.py:447
+#: HaiQR.py:435
 msgid "Help"
 msgstr ""
 
-#: ../HaiQR.py:452
+#: HaiQR.py:440
 msgid "QR generator for Haiku"
 msgstr ""
 
-#: ../HaiQR.py:473
+#: HaiQR.py:460
 msgid "Paste here:"
 msgstr ""
 
-#: ../HaiQR.py:486
+#: HaiQR.py:473
 msgid "QR it!"
 msgstr ""
 
-#: ../HaiQR.py:632
+#: HaiQR.py:604
 msgid "No help pages installed"
 msgstr ""
 
-#: ../HaiQR.py:632
+#: HaiQR.py:604
 msgid "Poor me"
 msgstr ""
 
-#: ../HaiQR.py:699
+#: HaiQR.py:673
 msgid ""
 "I cannot use this image\n"
 "Select another one?"
 msgstr ""
 
-#: ../HaiQR.py:699 ../HaiQR.py:712
+#: HaiQR.py:673 HaiQR.py:686
 msgid "Yes"
 msgstr ""
 
-#: ../HaiQR.py:699 ../HaiQR.py:712
+#: HaiQR.py:673 HaiQR.py:686
 msgid "No"
 msgstr ""
 
-#: ../HaiQR.py:712
+#: HaiQR.py:686
 msgid ""
 "This is not an image\n"
 "Retry?"
