@@ -40,16 +40,14 @@ except:
 	print("Install Pillow python module: pkgman install pillow_python310\nor pkgman install pillow_x86_python310 according to your architecture")
 	jes = True
 
-
-
 def Ent_config():
 	perc=BPath()
 	find_directory(directory_which.B_USER_NONPACKAGED_DATA_DIRECTORY,perc,False,None)
-	#datapath=BDirectory(perc.Path()+"/HaiQR2")
-	#ent=BEntry(datapath,perc.Path()+"/HaiQR2")
 	ent=BEntry(perc.Path()+"/HaiQR2")
-	if not ent.Exists() and ent.IsDirectory():
-		#datapath.CreateDirectory(perc.Path()+"/HaiQR2", None)#datapath)
+	if not ent.Exists():
+		BDirectory().CreateDirectory(perc.Path()+"/HaiQR2", None)
+	elif not ent.IsDirectory():
+		ent.Rename(perc.Path()+"/HaiPO2tmp")
 		BDirectory().CreateDirectory(perc.Path()+"/HaiQR2", None)
 	ent.GetPath(perc)
 	confile=BPath(perc.Path()+'/settings.cfg',None,False)
