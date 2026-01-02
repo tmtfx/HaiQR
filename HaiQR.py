@@ -262,7 +262,7 @@ def find_byte(lookf,looka,offset=0):
 appname=_("HaiQR2")
 version="2.2"
 # Translators: state of release like: alpha, beta, release
-state=_("beta")
+state=_("release")
 
 class PView(BView):
 	def __init__(self,frame,name,immagine):
