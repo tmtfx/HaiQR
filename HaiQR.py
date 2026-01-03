@@ -68,7 +68,7 @@ def lookfdata(name):
 		return (True,perc.Path())
 	else:
 		find_directory(directory_which.B_USER_NONPACKAGED_DATA_DIRECTORY,perc,False,None)
-		ent=BEntry(perc.Path()+"/HaiQR2/data/"+name)
+		ent=BEntry(perc.Path()+"/HaiQR2/"+name)
 		if ent.Exists():
 			#use mascot installed in user data folder
 			ent.GetPath(perc)

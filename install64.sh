@@ -68,7 +68,7 @@ echo
 DIRECTORY=`pwd`/data
 if [ -d $DIRECTORY  ]
 then
-	cp -R data /boot/home/config/non-packaged/data/HaiQR2
+	cp -R data/* /boot/home/config/non-packaged/data/HaiQR2
 	ret6=$?
 else
 	echo Missing Data directory and images
